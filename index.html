@@ -1,382 +1,282 @@
-<!DOCTYPE html> <!-- Define o tipo do documento como HTML5, a versão mais recente do HTML. -->
-<html lang="pt-br"> <!-- Elemento raiz do documento HTML, definindo o idioma principal como português do Brasil. -->
-<head> <!-- Seção de cabeçalho, contém metadados e links para recursos externos que não são visíveis na página. -->
-    <meta charset="UTF-8"> <!-- Define o conjunto de caracteres do documento como UTF-8, que suporta a maioria dos idiomas e símbolos. -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Configura a viewport para garantir que o layout se adapte a diferentes tamanhos de tela (responsividade). -->
-    <title>Carteirinha de Emergência</title> <!-- Define o título que aparece na aba ou janela do navegador. -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet"> <!-- Importa múltiplas fontes do Google Fonts. -->
-    <!-- Bibliotecas para gerar PDF e Imagem a partir do HTML -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script> <!-- Inclui a biblioteca externa 'html2canvas' para converter elementos HTML em imagens. -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script> <!-- Inclui a biblioteca externa 'html2pdf.js' para converter elementos HTML em arquivos PDF. -->
-    <style> /* Inicia um bloco de código CSS para definir os estilos visuais da página. */
-        
-        :root { /* Seletor de raiz, usado para declarar variáveis CSS que podem ser usadas em todo o documento. */
+<!DOCTYPE html> <!-- Define o tipo do documento como HTML5. -->
+<html lang="pt-br"> <!-- Elemento raiz, idioma português do Brasil. -->
+<head> <!-- Cabeçalho do documento. -->
+    <meta charset="UTF-8"> <!-- Codificação de caracteres UTF-8. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Responsividade para dispositivos móveis. -->
+    <title>Carteirinha de Emergência</title> <!-- Título da página. -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet"> <!-- Importa fontes do Google Fonts. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script> <!-- Biblioteca para gerar imagem do HTML. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script> <!-- Biblioteca para gerar PDF do HTML. -->
+    <style>
+        :root { /* Variáveis globais CSS. */
             --body-bg-color: #e9e9e9; /* Cor de fundo da página. */
-            --card-bg-color: #8e44ad; /* Cor de fundo principal da carteirinha. */
+            --card-bg-color: #8e44ad; /* Cor de fundo da carteirinha. */
             --main-text-color: #ffffff; /* Cor principal do texto. */
-            --heading-font: 'Roboto Condensed', sans-serif; /* Fonte para títulos. */
-            --main-font: 'Roboto', sans-serif; /* Fonte para o corpo do texto. */
-            --bg-image: none; /* Variável para a imagem de fundo da carteirinha. */
+            --heading-font: 'Roboto Condensed', sans-serif; /* Fonte dos títulos. */
+            --main-font: 'Roboto', sans-serif; /* Fonte do corpo do texto. */
+            --bg-image: none; /* Imagem de fundo da carteirinha. */
         }
 
-        /* --- Estrutura Principal --- */
-        body { 
-            font-family: var(--main-font); 
-            background-color: var(--body-bg-color);
-            color: var(--main-text-color);
-            margin: 0; padding: 0; 
-            transition: background-color 0.3s;
+        body { /* Estilo do corpo da página. */
+            font-family: var(--main-font); /* Fonte principal. */
+            background-color: var(--body-bg-color); /* Cor de fundo. */
+            color: var(--main-text-color); /* Cor do texto. */
+            margin: 0; padding: 0; /* Remove margens e preenchimento padrão. */
+            transition: background-color 0.3s; /* Transição suave da cor de fundo. */
         }
-        .page-wrapper { display: flex; align-items: flex-start; gap: 2rem; padding: 2rem; }
-        .main-content { 
-            flex: 1; min-width: 0; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        .page-wrapper { /* Container principal do layout. */
+            display: flex; /* Layout em flexbox. */
+            align-items: flex-start; /* Alinha itens ao topo. */
+            gap: 2rem; /* Espaço entre colunas. */
+            padding: 2rem; /* Espaçamento interno. */
         }
-        .floating-controls { width: 150px; flex-shrink: 0; position: sticky; top: 2rem; }
-        .card-container { 
-            width: 100%; 
-            max-width: 400px;
-            background-color: var(--card-bg-color);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            transition: background-color 0.3s;
-            position: relative; /* Necessário para o pseudo-elemento de fundo */
-            overflow: hidden; /* Garante que o fundo não vaze */
+        .main-content { /* Área principal à esquerda. */
+            flex: 1; min-width: 0; /* Ocupa espaço restante. */
+            display: flex; /* Flexbox. */
+            justify-content: center; /* Centraliza horizontalmente. */
+            align-items: center; /* Centraliza verticalmente. */
         }
-        .card-container::before {
+        .floating-controls { /* Barra lateral de controles. */
+            width: 150px; /* Largura fixa. */
+            flex-shrink: 0; /* Não reduz largura. */
+            position: sticky; /* Fixa no topo ao rolar. */
+            top: 2rem; /* Distância do topo. */
+        }
+        .card-container { /* Container da carteirinha. */
+            width: 100%; /* Ocupa toda largura disponível. */
+            max-width: 400px; /* Limite máximo de largura. */
+            background-color: var(--card-bg-color); /* Cor de fundo. */
+            border-radius: 20px; /* Cantos arredondados. */
+            padding: 2rem; /* Espaçamento interno. */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2); /* Sombra. */
+            transition: background-color 0.3s; /* Transição suave. */
+            position: relative; /* Necessário para pseudo-elemento. */
+            overflow: hidden; /* Esconde conteúdo que ultrapassa. */
+        }
+        .card-container::before { /* Pseudo-elemento para fundo com imagem. */
             content: '';
-            position: absolute;
-            top: 0; right: 0; bottom: 0; left: 0;
-            background-image: var(--bg-image);
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            opacity: 0.15;
-            filter: grayscale(50%) contrast(150%);
-            pointer-events: none;
-            z-index: 0;
+            position: absolute; /* Posiciona sobre o container. */
+            top: 0; right: 0; bottom: 0; left: 0; /* Ocupa todo espaço. */
+            background-image: var(--bg-image); /* Imagem de fundo. */
+            background-size: cover; /* Cobre todo espaço. */
+            background-position: center; /* Centraliza imagem. */
+            background-repeat: no-repeat; /* Não repete imagem. */
+            opacity: 0.15; /* Transparência. */
+            filter: grayscale(50%) contrast(150%); /* Filtro visual. */
+            pointer-events: none; /* Não interfere em interações. */
+            z-index: 0; /* Fica atrás do conteúdo. */
         }
-        .card-content {
-            position: relative;
-            z-index: 1;
-        }
-
-
-        /* --- Conteúdo da Carteirinha --- */
-        .profile-pic-container {
-            width: 150px;
-            height: 150px;
-            background-color: #ffffff;
-            border-radius: 15px; /* Alterado de 50% para 15px */
-            margin: 0 auto 1.5rem auto;
-            cursor: pointer;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: 5px solid rgba(255,255,255,0.5);
-        }
-        #profileImage {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none;
+        .card-content { /* Conteúdo da carteirinha. */
+            position: relative; /* Sobrepõe o fundo. */
+            z-index: 1; /* Fica acima do fundo. */
         }
 
-        .info-block {
-            text-align: center;
-            margin-bottom: 1.5rem;
+        .profile-pic-container { /* Container da foto de perfil. */
+            width: 150px; height: 150px; /* Tamanho fixo. */
+            background-color: #ffffff; /* Fundo branco. */
+            border-radius: 15px; /* Cantos arredondados. */
+            margin: 0 auto 1.5rem auto; /* Centraliza e espaça abaixo. */
+            cursor: pointer; /* Cursor de mão. */
+            overflow: hidden; /* Esconde excesso da imagem. */
+            display: flex; /* Flexbox para centralizar imagem. */
+            justify-content: center; align-items: center; /* Centraliza. */
+            border: 5px solid rgba(255,255,255,0.5); /* Borda semitransparente. */
         }
-        .info-block h1 {
-            font-family: var(--heading-font);
-            font-size: 1.8rem;
-            margin: 0;
-        }
-        .info-block h2 {
-            font-family: var(--heading-font);
-            font-size: 1.2rem;
-            margin: 0.5rem 0 0 0;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .info-block h3 {
-            font-family: var(--heading-font);
-            font-size: 1rem;
-            margin: 1.5rem 0 0.5rem 0;
-            text-transform: uppercase;
-            border-top: 1px solid rgba(255,255,255,0.3);
-            padding-top: 1.5rem;
-        }
-        .info-block p {
-            font-size: 0.9rem;
-            line-height: 1.6;
-            margin: 0.25rem 0;
-            white-space: pre-wrap; /* Permite quebras de linha no campo de medicações */
-        }
-        .info-block .allergy {
-            font-weight: 700;
-            color: #ffdd59;
+        #profileImage { /* Imagem de perfil. */
+            width: 100%; height: 100%; /* Ocupa todo container. */
+            object-fit: cover; /* Cobre todo espaço sem distorcer. */
+            display: none; /* Inicialmente oculta. */
         }
 
-        /* --- Botões da Barra Lateral --- */
-        .buttons-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 20px; }
-        .main-action-btn { 
-            width: 100%; padding: 10px; color: white; border: none;
-            border-radius: 5px; font-size: 0.9rem; font-weight: bold; cursor: pointer;
-            transition: background-color 0.3s;
+        .info-block { /* Bloco de informações. */
+            text-align: center; /* Centraliza texto. */
+            margin-bottom: 1.5rem; /* Espaço abaixo. */
         }
-        #savePdfBtn { background-color: #28a745; } #savePdfBtn:hover { background-color: #218838; }
-        #saveJpgBtn { background-color: #343a40; } #saveJpgBtn:hover { background-color: #23272b; }
-        #toggleEditModeBtn { background-color: #fd7e14; } #toggleEditModeBtn:hover { background-color: #e86a02; }
-        #customizeBtn { background-color: #6c757d; } #customizeBtn:hover { background-color: #5a6268; }
-        #uploadBgBtn { background-color: #5f27cd; } #uploadBgBtn:hover { background-color: #481e9e; }
-
-        /* --- Modo Edição --- */
-        .editable[contenteditable="true"] { outline: 2px dashed #fd7e14; background-color: rgba(255, 255, 255, 0.1); }
-        .selected-for-alignment { outline: 2px solid #007bff !important; }
-
-        /* --- Painel de Personalização --- */
-        .customizer-panel { display: none; background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #dee2e6; color: #333; }
-        .picker-group { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-        .picker-group label { font-weight: bold; font-size: 0.9rem; }
-        .picker-group input[type="color"] { -webkit-appearance: none; width: 40px; height: 25px; border: none; cursor: pointer; background: none; }
-        .picker-group input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-        .picker-group input[type="color"]::-webkit-color-swatch { border: 1px solid #ccc; border-radius: 4px;}
-        .btn-group button { padding: 5px 10px; border: 1px solid #ccc; background: #fff; cursor: pointer; border-radius: 4px; font-weight: bold; }
-        .btn-group button:hover { background: #eee; }
-        .delete-btn { padding: 5px 10px; color: white; border: none; border-radius: 4px; cursor: pointer; background-color: #c0392b;}
-
-        /* --- Layout Responsivo --- */
-        @media (max-width: 992px) {
-            .page-wrapper { flex-direction: column-reverse; padding: 1rem; gap: 1rem; }
-            .floating-controls { width: 100%; position: static; margin-bottom: 1rem; }
-            .main-content { padding: 1.5rem; }
-            .buttons-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+        .info-block h1 { /* Título principal. */
+            font-family: var(--heading-font); /* Fonte especial. */
+            font-size: 1.8rem; /* Tamanho grande. */
+            margin: 0; /* Sem margem. */
         }
-    </style> <!-- Fim do bloco de estilos CSS. -->
-</head> <!-- Fim da seção <head>. -->
-<body> <!-- Início da seção <body>, onde o conteúdo visível da página é colocado. -->
+        .info-block h2 { /* Subtítulo. */
+            font-family: var(--heading-font); /* Fonte especial. */
+            font-size: 1.2rem; /* Tamanho médio. */
+            margin: 0.5rem 0 0 0; /* Espaço acima. */
+            font-weight: 700; /* Negrito. */
+            text-transform: uppercase; /* Caixa alta. */
+        }
+        .info-block h3 { /* Título de seção. */
+            font-family: var(--heading-font); /* Fonte especial. */
+            font-size: 1rem; /* Tamanho pequeno. */
+            margin: 1.5rem 0 0.5rem 0; /* Espaço acima e abaixo. */
+            text-transform: uppercase; /* Caixa alta. */
+            border-top: 1px solid rgba(255,255,255,0.3); /* Linha acima. */
+            padding-top: 1.5rem; /* Espaço após linha. */
+        }
+        .info-block p { /* Parágrafo de informação. */
+            font-size: 0.9rem; /* Tamanho pequeno. */
+            line-height: 1.6; /* Espaçamento entre linhas. */
+            margin: 0.25rem 0; /* Espaço acima e abaixo. */
+            white-space: pre-wrap; /* Mantém quebras de linha. */
+        }
+        .info-block .allergy { /* Texto de alergia. */
+            font-weight: 700; /* Negrito. */
+            color: #ffdd59; /* Cor amarela. */
+        }
 
-    <div class="page-wrapper"> <!-- Contêiner principal que organiza o layout da página em duas colunas. -->
-        <div class="main-content"> <!-- Coluna principal à esquerda, contendo o documento. -->
-            <div class="card-container"> <!-- Contêiner do conteúdo. -->
-                <div class="card-content">
-                    <div class="profile-pic-container" id="uploadProfilePic">
-                        <img id="profileImage" alt="Foto de Perfil">
+        .buttons-grid { /* Grade dos botões da barra lateral. */
+            display: grid; /* Layout em grade. */
+            grid-template-columns: 1fr; /* Uma coluna. */
+            gap: 10px; /* Espaço entre botões. */
+            margin-bottom: 20px; /* Espaço abaixo. */
+        }
+        .main-action-btn { /* Botões principais. */
+            width: 100%; padding: 10px; /* Ocupa toda largura, espaçamento interno. */
+            color: white; border: none; /* Texto branco, sem borda. */
+            border-radius: 5px; /* Cantos arredondados. */
+            font-size: 0.9rem; font-weight: bold; /* Tamanho e peso do texto. */
+            cursor: pointer; /* Cursor de mão. */
+            transition: background-color 0.3s; /* Transição suave. */
+        }
+        #savePdfBtn { background-color: #28a745; } /* Cor verde. */
+        #savePdfBtn:hover { background-color: #218838; } /* Verde escuro ao passar mouse. */
+        #saveJpgBtn { background-color: #343a40; } /* Cor cinza escuro. */
+        #saveJpgBtn:hover { background-color: #23272b; } /* Cinza mais escuro ao passar mouse. */
+        #toggleEditModeBtn { background-color: #fd7e14; } /* Cor laranja. */
+        #toggleEditModeBtn:hover { background-color: #e86a02; } /* Laranja escuro ao passar mouse. */
+        #customizeBtn { background-color: #6c757d; } /* Cinza médio. */
+        #customizeBtn:hover { background-color: #5a6268; } /* Cinza escuro ao passar mouse. */
+        #uploadBgBtn { background-color: #5f27cd; } /* Roxo. */
+        #uploadBgBtn:hover { background-color: #481e9e; } /* Roxo escuro ao passar mouse. */
+
+        .editable[contenteditable="true"] { /* Elementos editáveis em modo edição. */
+            outline: 2px dashed #fd7e14; /* Borda laranja tracejada. */
+            background-color: rgba(255, 255, 255, 0.1); /* Fundo levemente branco. */
+        }
+        .selected-for-alignment { /* Elemento selecionado para alinhamento. */
+            outline: 2px solid #007bff !important; /* Borda azul sólida. */
+        }
+
+        .customizer-panel { /* Painel de personalização. */
+            display: none; /* Inicialmente oculto. */
+            background-color: #f8f9fa; /* Fundo claro. */
+            padding: 20px; /* Espaçamento interno. */
+            border-radius: 8px; /* Cantos arredondados. */
+            margin-bottom: 20px; /* Espaço abaixo. */
+            border: 1px solid #dee2e6; /* Borda cinza clara. */
+            color: #333; /* Texto escuro. */
+        }
+        .picker-group { /* Grupo de controles do painel. */
+            display: flex; /* Layout em linha. */
+            align-items: center; /* Centraliza verticalmente. */
+            justify-content: space-between; /* Espaça horizontalmente. */
+            margin-bottom: 10px; /* Espaço abaixo. */
+        }
+        .picker-group label { /* Rótulo dos controles. */
+            font-weight: bold; /* Negrito. */
+            font-size: 0.9rem; /* Tamanho pequeno. */
+        }
+        .picker-group input[type="color"] { /* Seletor de cor. */
+            -webkit-appearance: none; /* Remove estilo padrão. */
+            width: 40px; height: 25px; /* Tamanho fixo. */
+            border: none; cursor: pointer; /* Sem borda, cursor de mão. */
+            background: none; /* Sem fundo. */
+        }
+        .picker-group input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; } /* Remove padding do swatch. */
+        .picker-group input[type="color"]::-webkit-color-swatch { border: 1px solid #ccc; border-radius: 4px;} /* Borda e cantos arredondados do swatch. */
+        .btn-group button { /* Botões de grupo. */
+            padding: 5px 10px; /* Espaçamento interno. */
+            border: 1px solid #ccc; /* Borda cinza. */
+            background: #fff; /* Fundo branco. */
+            cursor: pointer; /* Cursor de mão. */
+            border-radius: 4px; /* Cantos arredondados. */
+            font-weight: bold; /* Negrito. */
+        }
+        .btn-group button:hover { background: #eee; } /* Fundo cinza claro ao passar mouse. */
+        .delete-btn { /* Botão de remover. */
+            padding: 5px 10px; color: white; /* Espaçamento e texto branco. */
+            border: none; border-radius: 4px; /* Sem borda, cantos arredondados. */
+            cursor: pointer; /* Cursor de mão. */
+            background-color: #c0392b; /* Vermelho escuro. */
+        }
+
+        @media (max-width: 992px) { /* Responsividade para telas menores. */
+            .page-wrapper { flex-direction: column-reverse; padding: 1rem; gap: 1rem; } /* Layout vertical. */
+            .floating-controls { width: 100%; position: static; margin-bottom: 1rem; } /* Barra lateral ocupa toda largura. */
+            .main-content { padding: 1.5rem; } /* Espaçamento interno. */
+            .buttons-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); } /* Botões em múltiplas colunas. */
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper"> <!-- Container principal do layout. -->
+        <div class="main-content"> <!-- Área principal à esquerda. -->
+            <div class="card-container"> <!-- Container da carteirinha. -->
+                <div class="card-content"> <!-- Conteúdo da carteirinha. -->
+                    <div class="profile-pic-container" id="uploadProfilePic"> <!-- Container da foto de perfil. -->
+                        <img id="profileImage" alt="Foto de Perfil"> <!-- Imagem de perfil. -->
                     </div>
-                    <input type="file" id="profileUploader" accept="image/*" style="display:none;">
+                    <input type="file" id="profileUploader" accept="image/*" style="display:none;"> <!-- Input oculto para upload de foto. -->
 
-                    <div class="info-block">
-                        <h1 class="editable">Gabrielle Souza Quintanilha Silva</h1>
-                        <h2 class="editable">EPILEPSIA E HIPOGLICEMIA</h2>
+                    <div class="info-block"> <!-- Bloco de informações principais. -->
+                        <h1 class="editable">Gabrielle Souza Quintanilha Silva</h1> <!-- Nome editável. -->
+                        <h2 class="editable">EPILEPSIA E HIPOGLICEMIA</h2> <!-- Diagnóstico editável. -->
                     </div>
 
-                    <div class="info-block">
-                        <h3 class="editable">MEDICAÇÕES:</h3>
-                        <p class="editable">FENOBARBITAL 150MG / 1X AO DIA<br>CLONOZEPAM 2MG / 3X AO DIA<br>FLUOXETINA 20MG / 1X AO DIA<br>TOPIRAMATO</p>
-                        <p class="editable allergy">ALERGIA A FENITOÍNA</p>
+                    <div class="info-block"> <!-- Bloco de medicações. -->
+                        <h3 class="editable">MEDICAÇÕES:</h3> <!-- Título editável. -->
+                        <p class="editable">FENOBARBITAL 150MG / 1X AO DIA<br>CLONOZEPAM 2MG / 3X AO DIA<br>FLUOXETINA 20MG / 1X AO DIA<br>TOPIRAMATO</p> <!-- Lista de medicações editável. -->
+                        <p class="editable allergy">ALERGIA A FENITOÍNA</p> <!-- Informação de alergia editável. -->
                     </div>
                     
-                    <div class="info-block">
-                         <p class="editable">ID Nº:</p>
+                    <div class="info-block"> <!-- Bloco de ID. -->
+                         <p class="editable">ID Nº:</p> <!-- ID editável. -->
                     </div>
 
-                    <div class="info-block">
-                        <h3 class="editable">Telefone de contato</h3>
-                        <p class="editable">Mãe (Fabiane):</p>
-                        <p class="editable">Padrinho (Roberto):</p>
+                    <div class="info-block"> <!-- Bloco de contatos. -->
+                        <h3 class="editable">Telefone de contato</h3> <!-- Título editável. -->
+                        <p class="editable">Mãe (Fabiane):</p> <!-- Contato editável. -->
+                        <p class="editable">Padrinho (Roberto):</p> <!-- Contato editável. -->
                     </div>
                 </div>
             </div>
         </div>
-        <div class="floating-controls"> <!-- Coluna da direita com as ferramentas de edição. -->
-            <div class="buttons-grid"> <!-- Grade para organizar os botões de ação. -->
-                <button id="savePdfBtn" class="main-action-btn">Salvar PDF</button>
-                <button id="saveJpgBtn" class="main-action-btn">Exportar JPG</button>
-                <button id="toggleEditModeBtn" class="main-action-btn">Ativar Edição</button>
-                <button id="customizeBtn" class="main-action-btn">Personalizar</button>
-                <button id="uploadBgBtn" class="main-action-btn">Adicionar Fundo</button>
-            </div> <!-- Fim da grade de botões. -->
-            <input type="file" id="bgUploader" accept="image/*" style="display:none;">
+        <div class="floating-controls"> <!-- Barra lateral de controles. -->
+            <div class="buttons-grid"> <!-- Grade dos botões. -->
+                <button id="savePdfBtn" class="main-action-btn">Salvar PDF</button> <!-- Botão para salvar PDF. -->
+                <button id="saveJpgBtn" class="main-action-btn">Exportar JPG</button> <!-- Botão para exportar JPG. -->
+                <button id="toggleEditModeBtn" class="main-action-btn">Ativar Edição</button> <!-- Botão para ativar edição. -->
+                <button id="customizeBtn" class="main-action-btn">Personalizar</button> <!-- Botão para abrir painel de personalização. -->
+                <button id="uploadBgBtn" class="main-action-btn">Adicionar Fundo</button> <!-- Botão para adicionar fundo. -->
+            </div>
+            <input type="file" id="bgUploader" accept="image/*" style="display:none;"> <!-- Input oculto para upload de fundo. -->
             
             <div id="colorCustomizer" class="customizer-panel"> <!-- Painel de personalização. -->
-                <div class="picker-group"><label for="pageBgColor">Fundo da Página</label><input type="color" id="pageBgColor"></div>
-                <div class="picker-group"><label for="cardBgColor">Fundo da Carteirinha</label><input type="color" id="cardBgColor"></div>
-                <div class="picker-group"><label for="textColor">Cor do Texto</label><input type="color" id="textColor"></div>
+                <div class="picker-group"><label for="pageBgColor">Fundo da Página</label><input type="color" id="pageBgColor"></div> <!-- Seletor de cor do fundo da página. -->
+                <div class="picker-group"><label for="cardBgColor">Fundo da Carteirinha</label><input type="color" id="cardBgColor"></div> <!-- Seletor de cor do fundo da carteirinha. -->
+                <div class="picker-group"><label for="textColor">Cor do Texto</label><input type="color" id="textColor"></div> <!-- Seletor de cor do texto. -->
                 <hr style="margin: 15px 0;"> <!-- Linha divisória. -->
-                <div class="picker-group"><label>Foto</label><button id="removeProfileBtn" class="delete-btn">Remover</button></div>
-                <div class="picker-group"><label>Fundo</label><button id="removeBgBtn" class="delete-btn">Remover</button></div>
+                <div class="picker-group"><label>Foto</label><button id="removeProfileBtn" class="delete-btn">Remover</button></div> <!-- Botão para remover foto. -->
+                <div class="picker-group"><label>Fundo</label><button id="removeBgBtn" class="delete-btn">Remover</button></div> <!-- Botão para remover fundo. -->
                 <hr style="margin: 15px 0;"> <!-- Linha divisória. -->
-                <div class="picker-group layout-controls"> <!-- Grupo de alinhamento. -->
-                    <label>Alinhar Texto</label> <!-- Rótulo. -->
-                    <div class="btn-group"> <!-- Agrupador de botões. -->
-                        <button id="alignLeftBtn">E</button>
-                        <button id="alignCenterBtn">C</button>
-                        <button id="alignRightBtn">D</button>
-                    </div> <!-- Fim do grupo. -->
-                </div> <!-- Fim do grupo de alinhamento. -->
+                <div class="picker-group layout-controls"> <!-- Grupo de alinhamento de texto. -->
+                    <label>Alinhar Texto</label>
+                    <div class="btn-group">
+                        <button id="alignLeftBtn">E</button> <!-- Alinhar à esquerda. -->
+                        <button id="alignCenterBtn">C</button> <!-- Alinhar ao centro. -->
+                        <button id="alignRightBtn">D</button> <!-- Alinhar à direita. -->
+                    </div>
+                </div>
                 <hr style="margin: 15px 0;"> <!-- Linha divisória. -->
                 <div class="picker-group font-controls"> <!-- Grupo de controle de fonte. -->
-                    <label>Tamanho da Fonte</label> <!-- Rótulo. -->
-                    <div class="btn-group"> <!-- Agrupador de botões. -->
-                        <button id="decreaseFontBtn">-</button> <!-- Botão para diminuir a fonte. -->
-                        <button id="increaseFontBtn">+</button> <!-- Botão para aumentar a fonte. -->
-                    </div> <!-- Fim do grupo de botões. -->
-                </div> <!-- Fim do grupo de fonte. -->
-            </div> <!-- Fim do painel de cores. -->
-        </div> <!-- Fim do floating-controls. -->
-    </div> <!-- Fim do page-wrapper. -->
-
-    <script> // Inicia um bloco de código JavaScript.
-        let isEditMode = false; // Controla se o modo de edição está ativo.
-        const toggleEditModeBtn = document.getElementById('toggleEditModeBtn'); // Botão de ativar edição.
-        let selectedEditableElement = null; // Guarda o elemento selecionado para alinhar ou mudar a fonte.
-
-        function getEditableElements() { return document.querySelectorAll('.editable'); } // Função para buscar todos os elementos editáveis.
-
-        document.addEventListener('click', function(event) { // Ouve cliques no documento.
-            if (isEditMode && event.target.closest('.editable')) { // Se em modo de edição e clicou em algo editável.
-                const targetEditable = event.target.closest('.editable'); // Pega o elemento editável mais próximo.
-                if (selectedEditableElement) { // Se já tem um selecionado.
-                    selectedEditableElement.classList.remove('selected-for-alignment'); // Remove o destaque.
-                } // Fim do if.
-                selectedEditableElement = targetEditable; // Define o novo selecionado.
-                selectedEditableElement.classList.add('selected-for-alignment'); // Adiciona o destaque.
-            } // Fim do if.
-        }); // Fim do ouvinte de clique.
-
-        function exitEditMode() { // Função para desativar o modo de edição.
-            if (isEditMode) { // Se estiver ativo.
-                isEditMode = false; // Desativa a flag.
-                toggleEditModeBtn.textContent = 'Ativar Edição'; // Restaura o texto do botão.
-                getEditableElements().forEach(el => { // Para cada elemento editável.
-                    el.contentEditable = 'false'; // Desativa a edição.
-                    el.classList.remove('selected-for-alignment'); // Remove o destaque.
-                }); // Fim do forEach.
-                selectedEditableElement = null; // Limpa a seleção.
-            } // Fim do if.
-        } // Fim da função.
-
-        function toggleInteractiveElements(shouldShow) { // Mostra ou oculta os controles.
-            exitEditMode(); // Garante que saia do modo de edição.
-            document.querySelector('.floating-controls').style.display = shouldShow ? 'block' : 'none'; // Mostra ou oculta.
-        } // Fim da função.
-
-        document.getElementById('savePdfBtn').addEventListener('click', function () { // Ouve o clique para salvar PDF.
-            const element = document.querySelector('.main-content'); // Seleciona o conteúdo a ser salvo.
-            toggleInteractiveElements(false); // Oculta os controles.
-            const opt = { margin: 0, filename: 'carteirinha.pdf', image: { type: 'jpeg', quality: 1.0 }, html2canvas: { scale: 3, useCORS: true, backgroundColor: getComputedStyle(document.body).getPropertyValue('--body-bg-color') }, jsPDF: { unit: 'in', format: [3.37, 2.125], orientation: 'landscape' } }; // Opções do PDF para tamanho de carteirinha.
-            html2pdf().from(element).set(opt).save().then(() => toggleInteractiveElements(true)); // Salva e depois mostra os controles.
-        }); // Fim do ouvinte.
-
-        document.getElementById('saveJpgBtn').addEventListener('click', function() { // Ouve o clique para salvar JPG.
-            const element = document.querySelector('.main-content'); // Seleciona o conteúdo.
-            toggleInteractiveElements(false); // Oculta os controles.
-            html2canvas(element, { useCORS: true, scale: 3, backgroundColor: getComputedStyle(document.body).getPropertyValue('--body-bg-color') }).then(canvas => { // Gera a imagem.
-                const link = document.createElement('a'); // Cria um link de download.
-                link.href = canvas.toDataURL('image/jpeg', 1.0); // Define o link para a imagem gerada.
-                link.download = 'carteirinha.jpg'; // Define o nome do arquivo.
-                link.click(); // Inicia o download.
-                toggleInteractiveElements(true); // Mostra os controles.
-            }); // Fim do processamento.
-        }); // Fim do ouvinte.
-
-        toggleEditModeBtn.addEventListener('click', function() { // Ouve o clique para ativar/desativar edição.
-            isEditMode = !isEditMode; // Inverte o estado.
-            this.textContent = isEditMode ? 'Salvar e Sair' : 'Ativar Edição'; // Muda o texto do botão.
-            getEditableElements().forEach(el => { el.contentEditable = isEditMode; }); // Ativa/desativa a edição.
-            if (!isEditMode && selectedEditableElement) { // Se saiu do modo de edição.
-                selectedEditableElement.classList.remove('selected-for-alignment'); // Remove o destaque.
-                selectedEditableElement = null; // Limpa a seleção.
-            } // Fim do if.
-        }); // Fim do ouvinte.
-
-        document.getElementById('customizeBtn').addEventListener('click', function() { // Ouve o clique no botão de customizar.
-            const panel = document.getElementById('colorCustomizer'); // Pega o painel de cores.
-            panel.style.display = panel.style.display === 'block' ? 'none' : 'block'; // Alterna a visibilidade.
-        }); // Fim do ouvinte.
-        
-        function updateColor(variableName, color) { document.documentElement.style.setProperty(variableName, color); } // Função para atualizar uma variável CSS.
-        document.getElementById('pageBgColor').addEventListener('input', (e) => updateColor('--body-bg-color', e.target.value)); // Ouve o seletor e atualiza a cor.
-        document.getElementById('cardBgColor').addEventListener('input', (e) => updateColor('--card-bg-color', e.target.value)); // Ouve o seletor e atualiza a cor.
-        document.getElementById('textColor').addEventListener('input', (e) => updateColor('--main-text-color', e.target.value)); // Ouve o seletor e atualiza a cor.
-        
-        function colorToHex(color) { // Converte cores RGB para Hexadecimal.
-            if (!color || color === 'transparent') return '#ffffff'; // Retorna branco se transparente.
-            if (color.startsWith('#')) return color; // Retorna se já for Hex.
-            if (color.startsWith('rgb')) { // Se for RGB.
-                const parts = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/); // Separa os valores.
-                parts.shift(); // Remove o primeiro item.
-                return '#' + parts.map(part => parseInt(part).toString(16).padStart(2, '0')).join(''); // Converte e junta.
-            } // Fim do if.
-            return color; // Retorna a cor original se não for um formato reconhecido.
-        } // Fim da função.
-        
-        setTimeout(() => { // Inicializa os seletores de cores na carga da página.
-            const computedStyle = getComputedStyle(document.documentElement); // Pega os estilos.
-            document.getElementById('pageBgColor').value = colorToHex(computedStyle.getPropertyValue('--body-bg-color').trim()); // Define o valor inicial.
-            document.getElementById('cardBgColor').value = colorToHex(computedStyle.getPropertyValue('--card-bg-color').trim()); // Define o valor inicial.
-            document.getElementById('textColor').value = colorToHex(computedStyle.getPropertyValue('--main-text-color').trim()); // Define o valor inicial.
-        }, 100); // Atraso.
-
-        // --- UPLOAD DE FOTO E FUNDO ---
-        document.getElementById('uploadProfilePic').addEventListener('click', () => document.getElementById('profileUploader').click());
-        document.getElementById('profileUploader').addEventListener('change', function(event) {
-            if (event.target.files[0]) {
-                const reader = new FileReader();
-                reader.onload = e => { 
-                    document.getElementById('profileImage').src = e.target.result; 
-                    document.getElementById('profileImage').style.display = 'block'; 
-                };
-                reader.readAsDataURL(event.target.files[0]);
-            }
-        });
-        document.getElementById('removeProfileBtn').addEventListener('click', function() {
-            document.getElementById('profileImage').src = ''; 
-            document.getElementById('profileImage').style.display = 'none'; 
-            document.getElementById('profileUploader').value = ''; 
-        });
-
-        document.getElementById('uploadBgBtn').addEventListener('click', () => document.getElementById('bgUploader').click());
-        document.getElementById('bgUploader').addEventListener('change', function(event) {
-            if (event.target.files[0]) {
-                const reader = new FileReader();
-                reader.onload = e => { document.documentElement.style.setProperty('--bg-image', `url('${e.target.result}')`); };
-                reader.readAsDataURL(event.target.files[0]);
-            }
-        });
-        document.getElementById('removeBgBtn').addEventListener('click', function() {
-            document.documentElement.style.setProperty('--bg-image', 'none'); 
-            document.getElementById('bgUploader').value = ''; 
-        });
-        
-        function alignSelectedElement(alignment) { // Função para alinhar texto.
-            if (isEditMode && selectedEditableElement) { // Se em modo de edição e com texto selecionado.
-                selectedEditableElement.style.textAlign = alignment; // Aplica o alinhamento.
-            } else if (isEditMode) { // Se em modo de edição mas sem texto selecionado.
-                alert("Por favor, clique em um texto para selecionar antes de alinhar."); // Alerta o usuário.
-            } // Fim do if/else.
-        } // Fim da função.
-
-        function changeFontSize(amount) { // Função para alterar o tamanho da fonte.
-            if (isEditMode && selectedEditableElement) { // Se em modo de edição e com texto selecionado.
-                const style = window.getComputedStyle(selectedEditableElement, null).getPropertyValue('font-size'); // Pega o tamanho da fonte atual.
-                const currentSize = parseFloat(style); // Converte para um número.
-                selectedEditableElement.style.fontSize = (currentSize + amount) + 'px'; // Aumenta ou diminui e aplica o novo tamanho.
-            } else if (isEditMode) { // Se em modo de edição mas sem texto selecionado.
-                alert("Por favor, clique em um texto para selecionar antes de alterar o tamanho da fonte."); // Alerta o usuário.
-            } // Fim do if/else.
-        } // Fim da função.
-        
-        document.getElementById('alignLeftBtn').addEventListener('click', () => alignSelectedElement('left')); // Ouve o clique para alinhar à esquerda.
-        document.getElementById('alignCenterBtn').addEventListener('click', () => alignSelectedElement('center')); // Ouve o clique para alinhar ao centro.
-        document.getElementById('alignRightBtn').addEventListener('click', () => alignSelectedElement('right')); // Ouve o clique para alinhar à direita.
-        document.getElementById('increaseFontBtn').addEventListener('click', () => changeFontSize(1)); // Ouve o clique para aumentar a fonte em 1px.
-        document.getElementById('decreaseFontBtn').addEventListener('click', () => changeFontSize(-1)); // Ouve o clique para diminuir a fonte em 1px.
-
-    </script> <!-- Fim do bloco de script. -->
-</body> <!-- Fim do corpo do documento. -->
-</html> <!-- Fim do documento HTML. -->
+                    <label>Tamanho da Fonte</label>
+                    <div class="btn-group">
+                        <button id="decreaseFontBtn">-</button> <!-- Diminuir fonte. -->
+                        <button id="increaseFontBtn">+</button> <!-- Aumentar fonte. -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- O JavaScript está logo abaixo, não comentado aqui por pedido do usuário. -->
+</body>
+</html>
