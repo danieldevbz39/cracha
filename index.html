@@ -27,14 +27,20 @@
             margin: 0; padding: 0; 
             transition: background-color 0.3s;
         }
-        .page-wrapper { display: flex; align-items: flex-start; gap: 2rem; padding: 2rem; }
+        .page-wrapper { display: flex; flex-direction: column; align-items: center; gap: 2rem; padding: 2rem; }
         .main-content { 
-            flex: 1; min-width: 0; 
+            width: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
         }
-        .floating-controls { width: 150px; flex-shrink: 0; position: sticky; top: 2rem; }
+        .floating-controls { 
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 1rem;
+         }
         .card-container { 
             width: 100%; 
             max-width: 400px;
@@ -121,25 +127,43 @@
             color: #ffdd59;
         }
 
-        /* --- Botões da Barra Lateral --- */
-        .buttons-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 20px; }
+        /* --- Botões --- */
         .main-action-btn { 
-            width: 100%; padding: 10px; color: white; border: none;
+            padding: 10px 15px; color: white; border: none;
             border-radius: 5px; font-size: 0.9rem; font-weight: bold; cursor: pointer;
             transition: background-color 0.3s;
         }
         #savePdfBtn { background-color: #28a745; } #savePdfBtn:hover { background-color: #218838; }
         #saveJpgBtn { background-color: #343a40; } #saveJpgBtn:hover { background-color: #23272b; }
         #toggleEditModeBtn { background-color: #fd7e14; } #toggleEditModeBtn:hover { background-color: #e86a02; }
-        #customizeBtn { background-color: #6c757d; } #customizeBtn:hover { background-color: #5a6268; }
-        #uploadBgBtn { background-color: #5f27cd; } #uploadBgBtn:hover { background-color: #481e9e; }
+        
+        .customizer-toggle-btn {
+             background-color: #6c757d;
+        }
+        .customizer-toggle-btn:hover {
+            background-color: #5a6268;
+        }
+
 
         /* --- Modo Edição --- */
         .editable[contenteditable="true"] { outline: 2px dashed #fd7e14; background-color: rgba(255, 255, 255, 0.1); }
         .selected-for-alignment { outline: 2px solid #007bff !important; }
 
         /* --- Painel de Personalização --- */
-        .customizer-panel { display: none; background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #dee2e6; color: #333; }
+        .customizer-panel { 
+            display: none; 
+            position: absolute;
+            right: 2rem;
+            top: 6rem;
+            width: 250px;
+            background-color: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 8px; 
+            border: 1px solid #dee2e6; 
+            color: #333; 
+            z-index: 100;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
         .picker-group { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
         .picker-group label { font-weight: bold; font-size: 0.9rem; }
         .picker-group input[type="color"] { -webkit-appearance: none; width: 40px; height: 25px; border: none; cursor: pointer; background: none; }
@@ -151,17 +175,24 @@
 
         /* --- Layout Responsivo --- */
         @media (max-width: 992px) {
-            .page-wrapper { flex-direction: column-reverse; padding: 1rem; gap: 1rem; }
-            .floating-controls { width: 100%; position: static; margin-bottom: 1rem; }
-            .main-content { padding: 1.5rem; }
-            .buttons-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+            .page-wrapper { flex-direction: column; padding: 1rem; }
+            .floating-controls { width: 100%; position: static; margin-bottom: 1rem; justify-content: center; }
+            .main-content { padding: 1rem; }
+            .customizer-panel { right: 1rem; top: 5rem; width: calc(100% - 2rem); }
         }
     </style> <!-- Fim do bloco de estilos CSS. -->
 </head> <!-- Fim da seção <head>. -->
 <body> <!-- Início da seção <body>, onde o conteúdo visível da página é colocado. -->
 
-    <div class="page-wrapper"> <!-- Contêiner principal que organiza o layout da página em duas colunas. -->
-        <div class="main-content"> <!-- Coluna principal à esquerda, contendo o documento. -->
+    <div class="page-wrapper"> <!-- Contêiner principal que organiza o layout da página. -->
+        <div class="floating-controls"> <!-- Contêiner para os botões de ação no topo. -->
+            <button id="savePdfBtn" class="main-action-btn">Salvar PDF</button>
+            <button id="saveJpgBtn" class="main-action-btn">Exportar JPG</button>
+            <button id="toggleEditModeBtn" class="main-action-btn">Ativar Edição</button>
+            <button id="customizeBtn" class="main-action-btn customizer-toggle-btn">Personalizar</button>
+        </div> <!-- Fim do contêiner de botões. -->
+        
+        <div class="main-content"> <!-- Coluna principal, contendo o documento. -->
             <div class="card-container"> <!-- Contêiner do conteúdo. -->
                 <div class="card-content">
                     <div class="profile-pic-container" id="uploadProfilePic">
@@ -192,43 +223,36 @@
                 </div>
             </div>
         </div>
-        <div class="floating-controls"> <!-- Coluna da direita com as ferramentas de edição. -->
-            <div class="buttons-grid"> <!-- Grade para organizar os botões de ação. -->
-                <button id="savePdfBtn" class="main-action-btn">Salvar PDF</button>
-                <button id="saveJpgBtn" class="main-action-btn">Exportar JPG</button>
-                <button id="toggleEditModeBtn" class="main-action-btn">Ativar Edição</button>
-                <button id="customizeBtn" class="main-action-btn">Personalizar</button>
-                <button id="uploadBgBtn" class="main-action-btn">Adicionar Fundo</button>
-            </div> <!-- Fim da grade de botões. -->
-            <input type="file" id="bgUploader" accept="image/*" style="display:none;">
-            
-            <div id="colorCustomizer" class="customizer-panel"> <!-- Painel de personalização. -->
-                <div class="picker-group"><label for="pageBgColor">Fundo da Página</label><input type="color" id="pageBgColor"></div>
-                <div class="picker-group"><label for="cardBgColor">Fundo da Carteirinha</label><input type="color" id="cardBgColor"></div>
-                <div class="picker-group"><label for="textColor">Cor do Texto</label><input type="color" id="textColor"></div>
-                <hr style="margin: 15px 0;"> <!-- Linha divisória. -->
-                <div class="picker-group"><label>Foto</label><button id="removeProfileBtn" class="delete-btn">Remover</button></div>
-                <div class="picker-group"><label>Fundo</label><button id="removeBgBtn" class="delete-btn">Remover</button></div>
-                <hr style="margin: 15px 0;"> <!-- Linha divisória. -->
-                <div class="picker-group layout-controls"> <!-- Grupo de alinhamento. -->
-                    <label>Alinhar Texto</label> <!-- Rótulo. -->
-                    <div class="btn-group"> <!-- Agrupador de botões. -->
-                        <button id="alignLeftBtn">E</button>
-                        <button id="alignCenterBtn">C</button>
-                        <button id="alignRightBtn">D</button>
-                    </div> <!-- Fim do grupo. -->
-                </div> <!-- Fim do grupo de alinhamento. -->
-                <hr style="margin: 15px 0;"> <!-- Linha divisória. -->
-                <div class="picker-group font-controls"> <!-- Grupo de controle de fonte. -->
-                    <label>Tamanho da Fonte</label> <!-- Rótulo. -->
-                    <div class="btn-group"> <!-- Agrupador de botões. -->
-                        <button id="decreaseFontBtn">-</button> <!-- Botão para diminuir a fonte. -->
-                        <button id="increaseFontBtn">+</button> <!-- Botão para aumentar a fonte. -->
-                    </div> <!-- Fim do grupo de botões. -->
-                </div> <!-- Fim do grupo de fonte. -->
-            </div> <!-- Fim do painel de cores. -->
-        </div> <!-- Fim do floating-controls. -->
+        
+        <div id="colorCustomizer" class="customizer-panel"> <!-- Painel de personalização (agora flutuante). -->
+            <div class="picker-group"><label for="pageBgColor">Fundo da Página</label><input type="color" id="pageBgColor"></div>
+            <div class="picker-group"><label for="cardBgColor">Fundo da Carteirinha</label><input type="color" id="cardBgColor"></div>
+            <div class="picker-group"><label for="textColor">Cor do Texto</label><input type="color" id="textColor"></div>
+            <hr style="margin: 15px 0;"> <!-- Linha divisória. -->
+            <div class="picker-group"><label>Foto</label><button id="removeProfileBtn" class="delete-btn">Remover</button></div>
+            <div class="picker-group"><label>Fundo</label><button id="removeBgBtn" class="delete-btn">Remover</button></div>
+             <div class="picker-group"><button id="uploadBgBtn" class="main-action-btn" style="width: auto; background-color: #5f27cd;">Adicionar Fundo</button></div>
+            <hr style="margin: 15px 0;"> <!-- Linha divisória. -->
+            <div class="picker-group layout-controls"> <!-- Grupo de alinhamento. -->
+                <label>Alinhar Texto</label> <!-- Rótulo. -->
+                <div class="btn-group"> <!-- Agrupador de botões. -->
+                    <button id="alignLeftBtn">E</button>
+                    <button id="alignCenterBtn">C</button>
+                    <button id="alignRightBtn">D</button>
+                </div> <!-- Fim do grupo. -->
+            </div> <!-- Fim do grupo de alinhamento. -->
+            <hr style="margin: 15px 0;"> <!-- Linha divisória. -->
+            <div class="picker-group font-controls"> <!-- Grupo de controle de fonte. -->
+                <label>Tamanho da Fonte</label> <!-- Rótulo. -->
+                <div class="btn-group"> <!-- Agrupador de botões. -->
+                    <button id="decreaseFontBtn">-</button> <!-- Botão para diminuir a fonte. -->
+                    <button id="increaseFontBtn">+</button> <!-- Botão para aumentar a fonte. -->
+                </div> <!-- Fim do grupo de botões. -->
+            </div> <!-- Fim do grupo de fonte. -->
+        </div> <!-- Fim do painel de cores. -->
+
     </div> <!-- Fim do page-wrapper. -->
+     <input type="file" id="bgUploader" accept="image/*" style="display:none;">
 
     <script> // Inicia um bloco de código JavaScript.
         let isEditMode = false; // Controla se o modo de edição está ativo.
@@ -262,7 +286,10 @@
 
         function toggleInteractiveElements(shouldShow) { // Mostra ou oculta os controles.
             exitEditMode(); // Garante que saia do modo de edição.
-            document.querySelector('.floating-controls').style.display = shouldShow ? 'block' : 'none'; // Mostra ou oculta.
+            document.querySelector('.floating-controls').style.display = shouldShow ? 'flex' : 'none'; // Mostra ou oculta.
+            if (!shouldShow) {
+                document.getElementById('colorCustomizer').style.display = 'none';
+            }
         } // Fim da função.
 
         document.getElementById('savePdfBtn').addEventListener('click', function () { // Ouve o clique para salvar PDF.
