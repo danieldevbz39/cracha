@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cartão de Saúde</title>
+    <title>Cartão de Saúde - Corrigido</title>
     <style>
         /* Estilos Base */
         body {
@@ -65,17 +65,18 @@
         .contact-info { top: 13.3cm; }
 
         .profile-pic-frame {
-            aspect-ratio: 1 / 1;
+            /* agora usamos background-image no frame para evitar cortes ao exportar */
             background-color: #ffffff;
             border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: block;
             overflow: hidden;
             border: 1px solid #ddd;
             flex-shrink: 0; 
+            background-size: cover; /* preenche o quadro mantendo aspecto */
+            background-position: center center; /* centraliza corretamente */
         }
-        .profile-pic { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: none; }
+        /* Mantive a tag <img> apenas como fallback; ela não será usada para renderizar a foto no export */
+        .profile-pic { width: 100%; height: 100%; object-fit: cover; object-position: center center; display: none; }
         .name { font-size: 0.55cm; font-weight: bold; line-height: 1.2; }
         .condition { font-size: 0.4cm; }
         .divider { height: 1px; background-color: #ffffff; }
@@ -101,13 +102,15 @@
         #group-layouts-preset { top: 20px; left: 740px; }
         .sub-group { margin-top: 10px; }
         .sub-group-label { font-size: 12px; font-weight: bold; color: #555; display: block; margin-bottom: 5px; }
-        .controls button, .controls input[type="file"] { padding: 6px 10px; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; font-size: 14px; background-color: #f8f9fa; color: #333; transition: background-color 0.2s, border-color 0.2s; margin-top: 4px; display: block; width: 100%; box-sizing: border-box; }
-        .controls button:hover { background-color: #e2e6ea; border-color: #bbb; }
-        .controls input[type="color"] { width: 100%; height: 35px; padding: 2px; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; }
+        .controls-wrapper button, .file-input-label { padding: 6px 10px; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; font-size: 14px; background-color: #f8f9fa; color: #333; transition: background-color 0.2s, border-color 0.2s; margin-top: 4px; display: block; width: 100%; box-sizing: border-box; }
+        .controls-wrapper button:hover, .file-input-label:hover { background-color: #e2e6ea; border-color: #bbb; }
+        .controls-wrapper input[type="color"] { width: 100%; height: 35px; padding: 2px; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; }
         .text-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 8px; }
         .color-picker-label { display: flex; align-items: center; justify-content: space-between; gap: 5px; margin-top: 8px; }
         .color-picker-label label { font-size: 12px; margin-bottom: 0; color: #333; }
         .transparency-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px; }
+        .transparency-controls button { font-size: 11px; padding: 6px 2px; }
+        .hidden-file-input { display: none; }
     </style>
 </head>
 <body>
@@ -124,7 +127,7 @@
             <div class="medication-item editable-text">FLUOXETINA 20MG / 1X AO DIA</div>
             <div class="medication-item editable-text">TOPIRAMATO</div>
         </div>
-        <div class="allergy" id="allergyText">
+        <div class="allergy" id="allergy" class="allergy-text editable-text">
             <div class="allergy-text editable-text">ALERGIA A FENITOÍNA</div>
         </div>
         <div class="notes-text editable-text" id="notesText">Observações...</div>
@@ -132,7 +135,7 @@
         <div class="contact-info editable-text" id="contactInfoText">TELEFONE DE CONTATO</div>
     </div>
 
-    <div class="controls">
+    <div class="controls-wrapper" id="controlsWrapper">
         <div class="control-group" id="group-layout">
             <div class="control-group-header">Edição de Layout</div>
             <div class="control-content">
@@ -155,8 +158,8 @@
         <div class="control-group" id="group-image">
             <div class="control-group-header">Imagem</div>
             <div class="control-content">
-                <div class="sub-group"><span class="sub-group-label">Foto de Perfil</span><input type="file" id="addPhotoBtn" accept="image/*" title="Adicionar Foto"><button id="removePhotoBtn">Remover</button></div>
-                <div class="sub-group"><span class="sub-group-label">Imagem de Fundo</span><input type="file" id="addBackgroundBtn" accept="image/*" title="Adicionar Fundo"><button id="removeBackgroundBtn">Remover</button>
+                <div class="sub-group"><span class="sub-group-label">Foto de Perfil</span><input type="file" id="addPhotoBtn" accept="image/*" class="hidden-file-input"><label for="addPhotoBtn" class="file-input-label">Escolher Arquivo</label><button id="removePhotoBtn">Remover</button></div>
+                <div class="sub-group"><span class="sub-group-label">Imagem de Fundo</span><input type="file" id="addBackgroundBtn" accept="image/*" class="hidden-file-input"><label for="addBackgroundBtn" class="file-input-label">Escolher Arquivo</label><button id="removeBackgroundBtn">Remover</button>
                     <div class="transparency-controls"><button id="increaseBgTransparencyBtn" title="Deixar imagem mais transparente">+ Transparência</button><button id="decreaseBgTransparencyBtn" title="Deixar imagem mais opaca">- Transparência</button></div>
                 </div>
             </div>
@@ -184,6 +187,7 @@
         const cardContainer = document.getElementById('cardContainer');
         const cardBackgroundImage = document.getElementById('cardBackgroundImage');
         const profilePic = document.getElementById('profilePic');
+        const profilePicFrame = document.getElementById('profilePicFrame');
         const addPhotoBtn = document.getElementById('addPhotoBtn');
         const removePhotoBtn = document.getElementById('removePhotoBtn');
         const addBackgroundBtn = document.getElementById('addBackgroundBtn');
@@ -212,52 +216,161 @@
         cardContainer.addEventListener('click', (e) => { if (selectedElement && e.target === cardContainer) { selectedElement.classList.remove('selected-text'); selectedElement = null; } });
 
         // LÓGICA DE AUMENTAR/REDUZIR TAMANHO
-        increaseTextSizeBtn.addEventListener('click', () => { if (selectedElement) { let currentSize = parseFloat(window.getComputedStyle(selectedElement).fontSize); selectedElement.style.fontSize = `${currentSize * 1.05}px`; } else { alert("Por favor, clique em um texto no crachá para selecionar antes de alterar o tamanho."); } });
-        decreaseTextSizeBtn.addEventListener('click', () => { if (selectedElement) { let currentSize = parseFloat(window.getComputedStyle(selectedElement).fontSize); selectedElement.style.fontSize = `${currentSize * 0.95}px`; } else { alert("Por favor, clique em um texto no crachá para selecionar antes de alterar o tamanho."); } });
+        increaseTextSizeBtn.addEventListener('click', () => { if (selectedElement) { let currentSize = parseFloat(window.getComputedStyle(selectedElement).fontSize); selectedElement.style.fontSize = `${currentSize * 1.05}px`; } });
+        decreaseTextSizeBtn.addEventListener('click', () => { if (selectedElement) { let currentSize = parseFloat(window.getComputedStyle(selectedElement).fontSize); selectedElement.style.fontSize = `${currentSize * 0.95}px`; } });
 
         // LÓGICA PARA CENTRALIZAR TUDO
-        centerAllBtn.addEventListener('click', () => {
-            allDraggableElements.forEach(el => {
-                el.style.left = '50%';
-                el.style.transform = 'translateX(-50%)';
-                if (el.classList.contains('editable-text') || el.classList.contains('medications')) { el.style.textAlign = 'center'; }
-            });
-        });
+        centerAllBtn.addEventListener('click', () => { allDraggableElements.forEach(el => { el.style.left = '50%'; el.style.transform = 'translateX(-50%)'; if (el.classList.contains('editable-text') || el.classList.contains('medications')) { el.style.textAlign = 'center'; } }); });
 
         // Eventos de cor
         document.getElementById('nameColorPicker').addEventListener('input', (e) => { document.getElementById('nameText').style.color = e.target.value; });
         document.getElementById('conditionColorPicker').addEventListener('input', (e) => { document.getElementById('conditionText').style.color = e.target.value; });
         document.getElementById('medTitleColorPicker').addEventListener('input', (e) => { document.getElementById('medicationsTitle').style.color = e.target.value; });
         document.getElementById('medListColorPicker').addEventListener('input', (e) => { document.querySelectorAll('#medicationsList .medication-item').forEach(item => item.style.color = e.target.value); });
-        document.getElementById('allergyColorPicker').addEventListener('input', (e) => { document.querySelector('.allergy-text').style.color = e.target.value; });
+        // Corrigido para aplicar cor diretamente no div pai 'allergy'
+        document.getElementById('allergyColorPicker').addEventListener('input', (e) => { document.querySelector('#allergy .allergy-text').style.color = e.target.value; });
         document.getElementById('notesColorPicker').addEventListener('input', (e) => { document.getElementById('notesText').style.color = e.target.value; });
         document.getElementById('idColorPicker').addEventListener('input', (e) => { document.getElementById('idNumberText').style.color = e.target.value; });
         document.getElementById('contactColorPicker').addEventListener('input', (e) => { document.getElementById('contactInfoText').style.color = e.target.value; });
         
         // Demais eventos
-        addPhotoBtn.addEventListener('change', (e) => { if (e.target.files && e.target.files[0]) { profilePic.src = URL.createObjectURL(e.target.files[0]); profilePic.style.display = 'block'; } });
-        removePhotoBtn.addEventListener('click', () => { profilePic.src = ''; profilePic.style.display = 'none'; addPhotoBtn.value = ''; });
-        addBackgroundBtn.addEventListener('change', (e) => { if (e.target.files && e.target.files[0]) { const reader = new FileReader(); reader.onload = (event) => { cardBackgroundImage.style.backgroundImage = `url(${event.target.result})`; bgImageOpacity = 1.0; cardBackgroundImage.style.opacity = bgImageOpacity; }; reader.readAsDataURL(e.target.files[0]); } });
+        // Função para converter File para Data URL
+        function fileToDataUrl(file, callback) {
+            const reader = new FileReader();
+            reader.onload = (event) => { callback(event.target.result); };
+            reader.readAsDataURL(file);
+        }
+
+        // USO DE BACKGROUND-IMAGE NO FRAME: evita cortes/sustentabilidade com html2canvas
+        addPhotoBtn.addEventListener('change', (e) => { 
+            if (e.target.files && e.target.files[0]) { 
+                fileToDataUrl(e.target.files[0], (dataUrl) => {
+                    // Definimos a imagem no background do frame (cover) — isso corrige cortes na exportação
+                    profilePicFrame.style.backgroundImage = `url(${dataUrl})`;
+                    // como fallback, mantemos a tag <img> atualizada (caso precise)
+                    profilePic.src = dataUrl; 
+                    profilePic.style.display = 'none';
+                });
+            } 
+        });
+        removePhotoBtn.addEventListener('click', () => { profilePic.src = ''; profilePic.style.display = 'none'; profilePicFrame.style.backgroundImage = 'none'; addPhotoBtn.value = ''; });
+        
+        addBackgroundBtn.addEventListener('change', (e) => { 
+            if (e.target.files && e.target.files[0]) { 
+                fileToDataUrl(e.target.files[0], (dataUrl) => {
+                    cardBackgroundImage.style.backgroundImage = `url(${dataUrl})`; 
+                    bgImageOpacity = 1.0; 
+                    cardBackgroundImage.style.opacity = bgImageOpacity; 
+                });
+            } 
+        });
         removeBackgroundBtn.addEventListener('click', () => { cardBackgroundImage.style.backgroundImage = 'none'; addBackgroundBtn.value = ''; });
+        
         backgroundColorPicker.addEventListener('input', (e) => { cardContainer.style.backgroundColor = e.target.value; });
         increaseBgTransparencyBtn.addEventListener('click', () => { bgImageOpacity = Math.max(0, bgImageOpacity - 0.1); cardBackgroundImage.style.opacity = bgImageOpacity; });
         decreaseBgTransparencyBtn.addEventListener('click', () => { bgImageOpacity = Math.min(1, bgImageOpacity + 0.1); cardBackgroundImage.style.opacity = bgImageOpacity; });
         
-        function beforeExport() { if(selectedElement){ selectedElement.classList.remove('selected-text'); selectedElement = null; } }
-        exportJpegBtn.addEventListener('click', () => { beforeExport(); html2canvas(cardContainer, { scale: 3, useCORS: true }).then(canvas => { const link = document.createElement('a'); link.href = canvas.toDataURL('image/jpeg', 0.9); link.download = 'cartao-saude.jpg'; link.click(); }); });
-        exportPdfBtn.addEventListener('click', () => { beforeExport(); html2canvas(cardContainer, { scale: 4, useCORS: true }).then(canvas => { const imgData = canvas.toDataURL('image/png'); const { jsPDF } = window.jspdf; const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [100, 150] }); pdf.addImage(imgData, 'PNG', 0, 0, 100, 150); pdf.save('cartao-saude.pdf'); }); });
+        const controlsWrapper = document.getElementById('controlsWrapper');
+
+        // Guardamos transformações para restaurar após export
+        let originalTransforms = new Map();
+        function beforeExport() { 
+            if(selectedElement){ 
+                selectedElement.classList.remove('selected-text'); 
+                selectedElement = null; 
+            }
+            // Oculta os controles
+            controlsWrapper.style.display = 'none';
+
+            // Remover temporariamente transforms que podem afetar o recorte no html2canvas
+            allDraggableElements.forEach(el => {
+                originalTransforms.set(el, el.style.transform || getComputedStyle(el).transform || '');
+                // definir transformação para 'none' e ajustar left para manter centralização visual
+                const rect = el.getBoundingClientRect();
+                const cardRect = cardContainer.getBoundingClientRect();
+                // convertemos a posição atual para pixels relativos ao container
+                const leftPx = rect.left - cardRect.left;
+                const topPx = rect.top - cardRect.top;
+                // aplicamos left/top em pixels e removemos transform
+                el.style.left = `${leftPx}px`;
+                el.style.top = `${topPx}px`;
+                el.style.transform = 'none';
+            });
+        }
+
+        function afterExport() {
+            // Restaurar transforms originais
+            allDraggableElements.forEach(el => {
+                const prev = originalTransforms.get(el);
+                if (prev) {
+                    el.style.transform = prev === 'none' ? '' : prev;
+                }
+            });
+            originalTransforms.clear();
+            // Mostra os controles de volta
+            controlsWrapper.style.display = 'block';
+        }
+
+        exportJpegBtn.addEventListener('click', () => { 
+            beforeExport(); 
+            // html2canvas com scale maior para melhor resolução
+            html2canvas(cardContainer, { scale: 3, useCORS: true, allowTaint: false, backgroundColor: null }).then(canvas => { 
+                const link = document.createElement('a'); 
+                link.href = canvas.toDataURL('image/jpeg', 0.9); 
+                link.download = 'cartao-saude.jpg'; 
+                link.click(); 
+                afterExport();
+            }).catch(error => {
+                console.error("Erro ao exportar JPG:", error);
+                alert("Ocorreu um erro ao exportar o JPG. Verifique o console para detalhes.");
+                afterExport();
+            }); 
+        });
+
+        exportPdfBtn.addEventListener('click', () => { 
+            beforeExport(); 
+            html2canvas(cardContainer, { scale: 4, useCORS: true, allowTaint: false, backgroundColor: null }).then(canvas => { 
+                const imgData = canvas.toDataURL('image/png'); 
+                const { jsPDF } = window.jspdf; 
+                // Mantive mm e tamanho equivalente 100x150 (mm)
+                const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [100, 150] }); 
+                pdf.addImage(imgData, 'PNG', 0, 0, 100, 150); 
+                pdf.save('cartao-saude.pdf'); 
+                afterExport();
+            }).catch(error => {
+                console.error("Erro ao exportar PDF:", error);
+                alert("Ocorreu um erro ao exportar o PDF. Verifique o console para detalhes.");
+                afterExport();
+            }); 
+        });
 
         // LÓGICA PARA ARRASTAR CONTEÚDO DENTRO DO CARTÃO
         allDraggableElements.forEach(el => {
             let isDragging = false, offsetX, offsetY;
-            el.addEventListener('mousedown', (e) => { if (e.target.isContentEditable && document.activeElement === e.target) { return; } isDragging = true; offsetX = e.clientX - el.offsetLeft; offsetY = e.clientY - el.offsetTop; el.style.zIndex = 2; e.preventDefault(); });
-            document.addEventListener('mousemove', (e) => { if (!isDragging) return; el.style.left = `${e.clientX - offsetX}px`; el.style.top = `${e.clientY - offsetY}px`; });
-            document.addEventListener('mouseup', () => { isDragging = false; el.style.zIndex = 1; });
+            el.addEventListener('mousedown', (e) => { 
+                if (el.contentEditable === 'true') { return; } 
+                isDragging = true; 
+                offsetX = e.clientX - el.getBoundingClientRect().left; 
+                offsetY = e.clientY - el.getBoundingClientRect().top; 
+                el.style.zIndex = 2; 
+                e.preventDefault(); 
+            });
+            document.addEventListener('mousemove', (e) => { 
+                if (!isDragging) return; 
+                const cardRect = cardContainer.getBoundingClientRect(); 
+                el.style.left = `${e.clientX - cardRect.left - offsetX}px`; 
+                el.style.top = `${e.clientY - cardRect.top - offsetY}px`; 
+                el.style.transform = 'none'; 
+            });
+            document.addEventListener('mouseup', () => { 
+                isDragging = false; 
+                el.style.zIndex = 1; 
+            });
         });
 
         // --- LÓGICA PARA TROCA DE LAYOUTS ---
         const layoutPresets = {
-            original: { profilePicFrame: { top: '1.5cm', left: '50%', transform: 'translateX(-50%)' }, nameText: { top: '5.5cm', left: '50%', transform: 'translateX(-50%)' }, conditionText: { top: '6.8cm', left: '50%', transform: 'translateX(-50%)' }, dividerLine: { top: '7.8cm', left: '50%', transform: 'translateX(-50%)' }, medicationsTitle: { top: '8.2cm', left: '50%', transform: 'translateX(-50%)' }, medicationsList: { top: '8.9cm', left: '50%', transform: 'translateX(-50%)' }, allergyText: { top: '11.2cm', left: '50%', transform: 'translateX(-50%)' }, notesText: { top: '11.9cm', left: '50%', transform: 'translateX(-50%)' }, idNumberText: { top: '12.6cm', left: '50%', transform: 'translateX(-50%)' }, contactInfoText: { top: '13.3cm', left: '50%', transform: 'translateX(-50%)' }, textAlign: 'center'},
+            original: { profilePicFrame: { top: '1.5cm', left: '50%', transform: 'translateX(-50%)' }, nameText: { top: '5.5cm', left: '50%', transform: 'translateX(-50%)' }, conditionText: { top: '6.8cm', left: '50%', transform: 'translateX(-50%)' }, dividerLine: { top: '7.8cm', left: '50%', transform: 'translateX(-50%)' }, medicationsTitle: { top: '8.2cm', left: '50%', transform: 'translateX(-50%)' }, medicationsList: { top: '8.9cm', left: '50%', transform: 'translateX(-50%)' }, allergy: { top: '11.2cm', left: '50%', transform: 'translateX(-50%)' }, notesText: { top: '11.9cm', left: '50%', transform: 'translateX(-50%)' }, idNumberText: { top: '12.6cm', left: '50%', transform: 'translateX(-50%)' }, contactInfoText: { top: '13.3cm', left: '50%', transform: 'translateX(-50%)' }, textAlign: 'center'},
             layout2: { 
                 profilePicFrame: { top: '1.5cm', left: '1.5cm', transform: 'none' }, 
                 nameText: { top: '1.5cm', left: '5.5cm', transform: 'none', width: '4cm', textAlign: 'left' }, 
@@ -265,27 +378,29 @@
                 dividerLine: { top: '5cm', left: '50%', transform: 'translateX(-50%)' }, 
                 medicationsTitle: { top: '5.5cm', left: '5%', transform: 'none', width: '90%', textAlign: 'left' }, 
                 medicationsList: { top: '6.3cm', left: '5%', transform: 'none', width: '90%', textAlign: 'left' }, 
-                allergyText: { top: '8.8cm', left: '5%', transform: 'none', width: '90%', textAlign: 'left' }, 
+                allergy: { top: '8.8cm', left: '5%', transform: 'none', width: '90%', textAlign: 'left' }, 
                 notesText: { top: '9.5cm', left: '5%', transform: 'none', width: '90%', textAlign: 'left' }, 
                 idNumberText: { top: '12.8cm', left: '50%', transform: 'translateX(-50%)', textAlign: 'center' }, 
                 contactInfoText: { top: '13.5cm', left: '50%', transform: 'translateX(-50%)', textAlign: 'center' }
             },
-            layout3: { profilePicFrame: { top: '1.5cm', left: '50%', transform: 'translateX(-50%)' }, nameText: { top: '5.5cm', left: '50%', transform: 'translateX(-50%)' }, conditionText: { top: '6.8cm', left: '50%', transform: 'translateX(-50%)' }, dividerLine: { top: '7.8cm', left: '50%', transform: 'translateX(-50%)' }, medicationsTitle: { top: '8.2cm', left: '50%', transform: 'translateX(-50%)' }, medicationsList: { top: '8.9cm', left: '50%', transform: 'translateX(-50%)' }, allergyText: { top: '11.2cm', left: '50%', transform: 'translateX(-50%)' }, notesText: { top: '11.9cm', left: '50%', transform: 'translateX(-50%)' }, idNumberText: { top: '13.3cm', left: '10%', transform: 'none', width: 'auto', textAlign: 'left' }, contactInfoText: { top: '13.3cm', left: 'auto', right: '10%', transform: 'none', width: 'auto', textAlign: 'right' }, textAlign: 'center'},
-            layout4: { profilePicFrame: { top: '10cm', left: '50%', transform: 'translateX(-50%)' }, nameText: { top: '1.5cm', left: '50%', transform: 'translateX(-50%)' }, conditionText: { top: '2.8cm', left: '50%', transform: 'translateX(-50%)' }, dividerLine: { top: '3.8cm', left: '50%', transform: 'translateX(-50%)' }, medicationsTitle: { top: '4.2cm', left: '50%', transform: 'translateX(-50%)' }, medicationsList: { top: '4.9cm', left: '50%', transform: 'translateX(-50%)' }, allergyText: { top: '7.2cm', left: '50%', transform: 'translateX(-50%)' }, notesText: { top: '7.9cm', left: '50%', transform: 'translateX(-50%)' }, idNumberText: { top: '8.6cm', left: '50%', transform: 'translateX(-50%)' }, contactInfoText: { top: '13.5cm', left: '50%', transform: 'translateX(-50%)' }, textAlign: 'center'}
+            layout3: { profilePicFrame: { top: '1.5cm', left: '50%', transform: 'translateX(-50%)' }, nameText: { top: '5.5cm', left: '50%', transform: 'translateX(-50%)' }, conditionText: { top: '6.8cm', left: '50%', transform: 'translateX(-50%)' }, dividerLine: { top: '7.8cm', left: '50%', transform: 'translateX(-50%)' }, medicationsTitle: { top: '8.2cm', left: '50%', transform: 'translateX(-50%)' }, medicationsList: { top: '8.9cm', left: '50%', transform: 'translateX(-50%)' }, allergy: { top: '11.2cm', left: '50%', transform: 'translateX(-50%)' }, notesText: { top: '11.9cm', left: '50%', transform: 'translateX(-50%)' }, idNumberText: { top: '13.3cm', left: '10%', transform: 'none', width: 'auto', textAlign: 'left' }, contactInfoText: { top: '13.3cm', left: 'auto', right: '10%', transform: 'none', width: 'auto', textAlign: 'right' }, textAlign: 'center'},
+            layout4: { profilePicFrame: { top: '10cm', left: '50%', transform: 'translateX(-50%)' }, nameText: { top: '1.5cm', left: '50%', transform: 'translateX(-50%)' }, conditionText: { top: '2.8cm', left: '50%', transform: 'translateX(-50%)' }, dividerLine: { top: '3.8cm', left: '50%', transform: 'translateX(-50%)' }, medicationsTitle: { top: '4.2cm', left: '50%', transform: 'translateX(-50%)' }, medicationsList: { top: '4.9cm', left: '50%', transform: 'translateX(-50%)' }, allergy: { top: '7.2cm', left: '50%', transform: 'translateX(-50%)' }, notesText: { top: '7.9cm', left: '50%', transform: 'translateX(-50%)' }, idNumberText: { top: '8.6cm', left: '50%', transform: 'translateX(-50%)' }, contactInfoText: { top: '13.5cm', left: '50%', transform: 'translateX(-50%)' }, textAlign: 'center'}
         };
 
         function applyLayout(preset) {
             for (const id in preset) {
-                if (id === 'textAlign') continue;
-                const element = document.getElementById(id);
+                // Se o ID for 'allergyText', ele é um child de 'allergy' no HTML, e o layout
+                // está se referindo ao elemento pai 'allergy'
+                const elementId = id === 'allergyText' ? 'allergy' : id; 
+                const element = document.getElementById(elementId);
+
                 if (element) {
-                    const styles = preset[id];
+                    const styles = preset[id]; // Usa 'id' original para pegar estilos do preset
                     element.style.top = styles.top || '';
                     element.style.left = styles.left || '';
                     element.style.right = styles.right || '';
-                    element.style.width = styles.width || (id === 'profilePicFrame' ? '3.5cm' : (id === 'dividerLine' ? '80%' : '90%'));
+                    element.style.width = styles.width || (elementId === 'profilePicFrame' ? '3.5cm' : (elementId === 'dividerLine' ? '80%' : '90%'));
                     element.style.transform = styles.transform || 'none';
-                    // Aplica o alinhamento de texto específico do estilo, se houver, ou o padrão do preset
                     element.style.textAlign = styles.textAlign || preset.textAlign || 'center';
                 }
             }
@@ -299,14 +414,36 @@
         const controlGroups = document.querySelectorAll('.control-group');
         controlGroups.forEach(group => {
             const header = group.querySelector('.control-group-header');
-            header.addEventListener('click', () => {
-                controlGroups.forEach(otherGroup => { if (otherGroup !== group) { otherGroup.classList.remove('active'); } });
-                group.classList.toggle('active');
-            });
             let isDragging = false, offsetX, offsetY;
-            header.addEventListener('mousedown', (e) => { isDragging = true; controlGroups.forEach(g => g.style.zIndex = 1000); group.style.zIndex = 1001; offsetX = e.clientX - group.offsetLeft; offsetY = e.clientY - group.offsetTop; e.preventDefault(); });
-            document.addEventListener('mousemove', (e) => { if (!isDragging) return; let newX = e.clientX - offsetX; let newY = e.clientY - offsetY; group.style.left = `${newX}px`; group.style.top = `${newY}px`; });
-            document.addEventListener('mouseup', () => { isDragging = false; });
+            
+            header.addEventListener('mousedown', (e) => {
+                if (e.target !== header) return; // Só arrasta se clicar no header, não nos botões
+                isDragging = true;
+                controlGroups.forEach(g => g.style.zIndex = 1000);
+                group.style.zIndex = 1001;
+                offsetX = e.clientX - group.offsetLeft;
+                offsetY = e.clientY - group.offsetTop;
+                e.preventDefault();
+            });
+
+            header.addEventListener('click', (e) => {
+                if(e.target === header) {
+                    controlGroups.forEach(otherGroup => { if (otherGroup !== group) { otherGroup.classList.remove('active'); } });
+                    group.classList.toggle('active');
+                }
+            });
+
+            document.addEventListener('mousemove', (e) => { 
+                if (!isDragging) return; 
+                let newX = e.clientX - offsetX; 
+                let newY = e.clientY - offsetY; 
+                group.style.left = `${newX}px`; 
+                group.style.top = `${newY}px`; 
+            });
+
+            document.addEventListener('mouseup', () => { 
+                setTimeout(() => { isDragging = false; }, 50);
+            });
         });
     </script>
 </body>
