@@ -1,410 +1,313 @@
-<!DOCTYPE html> <!-- Define o tipo do documento como HTML5, a versão mais recente do HTML. -->
-<html lang="pt-br"> <!-- Elemento raiz do documento HTML, definindo o idioma principal como português do Brasil. -->
-<head> <!-- Seção de cabeçalho, contém metadados e links para recursos externos que não são visíveis na página. -->
-    <meta charset="UTF-8"> <!-- Define o conjunto de caracteres do documento como UTF-8, que suporta a maioria dos idiomas e símbolos. -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Configura a viewport para garantir que o layout se adapte a diferentes tamanhos de tela (responsividade). -->
-    <title>Carteirinha de Emergência</title> <!-- Define o título que aparece na aba ou janela do navegador. -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet"> <!-- Importa múltiplas fontes do Google Fonts. -->
-    <!-- Bibliotecas para gerar PDF e Imagem a partir do HTML -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script> <!-- Inclui a biblioteca externa 'html2canvas' para converter elementos HTML em imagens. -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script> <!-- Inclui a biblioteca externa 'html2pdf.js' para converter elementos HTML em arquivos PDF. -->
-    <style> /* Inicia um bloco de código CSS para definir os estilos visuais da página. */
-        
-        :root { /* Seletor de raiz, usado para declarar variáveis CSS que podem ser usadas em todo o documento. */
-            --body-bg-color: #e9e9e9; /* Cor de fundo da página. */
-            --card-bg-color: #8e44ad; /* Cor de fundo principal da carteirinha. */
-            --main-text-color: #ffffff; /* Cor principal do texto. */
-            --heading-font: 'Roboto Condensed', sans-serif; /* Fonte para títulos. */
-            --main-font: 'Roboto', sans-serif; /* Fonte para o corpo do texto. */
-            --bg-image: none; /* Variável para a imagem de fundo da carteirinha. */
-        }
-
-        /* --- Estrutura Principal --- */
-        body { 
-            font-family: var(--main-font); 
-            background-color: var(--body-bg-color);
-            color: var(--main-text-color);
-            margin: 0; padding: 0; 
-            transition: background-color 0.3s;
-        }
-        .page-wrapper { display: flex; flex-direction: column; align-items: center; gap: 2rem; padding: 2rem; }
-        .main-content { 
-            width: 100%;
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartão de Saúde</title>
+    <style>
+        /* Estilos Base */
+        body {
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+            box-sizing: border-box;
         }
-        .floating-controls { 
-            width: 100%;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-bottom: 1rem;
-         }
-        .card-container { 
-            width: 100%; 
-            max-width: 400px;
-            background-color: var(--card-bg-color);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            transition: background-color 0.3s;
-            position: relative; /* Necessário para o pseudo-elemento de fundo */
-            overflow: hidden; /* Garante que o fundo não vaze */
-        }
-        .card-container::before {
-            content: '';
-            position: absolute;
-            top: 0; right: 0; bottom: 0; left: 0;
-            background-image: var(--bg-image);
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            opacity: 0.15;
-            filter: grayscale(50%) contrast(150%);
-            pointer-events: none;
-            z-index: 0;
-        }
-        .card-content {
+        .card-container {
+            width: 10cm;
+            height: 15cm;
+            background-color: #6a0dad; 
+            color: #ffffff;
+            padding: 1cm;
+            box-sizing: border-box;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             position: relative;
-            z-index: 1;
-        }
-
-
-        /* --- Conteúdo da Carteirinha --- */
-        .profile-pic-container {
-            width: 150px;
-            height: 150px;
-            background-color: #ffffff;
-            border-radius: 15px; /* Alterado de 50% para 15px */
-            margin: 0 auto 1.5rem auto;
-            cursor: pointer;
             overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: 5px solid rgba(255,255,255,0.5);
         }
-        #profileImage {
+        .card-background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            display: none;
+            background-size: cover;
+            background-position: center;
+            opacity: 1;
+            transition: opacity 0.2s ease-in-out;
+            border-radius: 15px;
         }
 
-        .info-block {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-        .info-block h1 {
-            font-family: var(--heading-font);
-            font-size: 1.8rem;
-            margin: 0;
-        }
-        .info-block h2 {
-            font-family: var(--heading-font);
-            font-size: 1.2rem;
-            margin: 0.5rem 0 0 0;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .info-block h3 {
-            font-family: var(--heading-font);
-            font-size: 1rem;
-            margin: 1.5rem 0 0.5rem 0;
-            text-transform: uppercase;
-            border-top: 1px solid rgba(255,255,255,0.3);
-            padding-top: 1.5rem;
-        }
-        .info-block p {
-            font-size: 0.9rem;
-            line-height: 1.6;
-            margin: 0.25rem 0;
-            white-space: pre-wrap; /* Permite quebras de linha no campo de medicações */
-        }
-        .info-block .allergy {
-            font-weight: 700;
-            color: #ffdd59;
-        }
-
-        /* --- Botões --- */
-        .main-action-btn { 
-            padding: 10px 15px; color: white; border: none;
-            border-radius: 5px; font-size: 0.9rem; font-weight: bold; cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        #savePdfBtn { background-color: #28a745; } #savePdfBtn:hover { background-color: #218838; }
-        #saveJpgBtn { background-color: #343a40; } #saveJpgBtn:hover { background-color: #23272b; }
-        #toggleEditModeBtn { background-color: #fd7e14; } #toggleEditModeBtn:hover { background-color: #e86a02; }
-        
-        .customizer-toggle-btn {
-             background-color: #6c757d;
-        }
-        .customizer-toggle-btn:hover {
-            background-color: #5a6268;
-        }
-
-
-        /* --- Modo Edição --- */
-        .editable[contenteditable="true"] { outline: 2px dashed #fd7e14; background-color: rgba(255, 255, 255, 0.1); }
-        .selected-for-alignment { outline: 2px solid #007bff !important; }
-
-        /* --- Painel de Personalização --- */
-        .customizer-panel { 
-            display: none; 
+        .profile-pic-frame, .name, .condition, .section-title, .medications, .allergy, .id-number, .contact-info, .divider, .notes-text {
             position: absolute;
-            right: 2rem;
-            top: 6rem;
-            width: 250px;
-            background-color: #f8f9fa; 
-            padding: 20px; 
-            border-radius: 8px; 
-            border: 1px solid #dee2e6; 
-            color: #333; 
-            z-index: 100;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            cursor: move;
+            width: 90%;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            transition: top 0.5s ease, left 0.5s ease, width 0.5s ease, transform 0.5s ease, text-align 0.5s ease;
         }
-        .picker-group { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-        .picker-group label { font-weight: bold; font-size: 0.9rem; }
-        .picker-group input[type="color"] { -webkit-appearance: none; width: 40px; height: 25px; border: none; cursor: pointer; background: none; }
-        .picker-group input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-        .picker-group input[type="color"]::-webkit-color-swatch { border: 1px solid #ccc; border-radius: 4px;}
-        .btn-group button { padding: 5px 10px; border: 1px solid #ccc; background: #fff; cursor: pointer; border-radius: 4px; font-weight: bold; }
-        .btn-group button:hover { background: #eee; }
-        .delete-btn { padding: 5px 10px; color: white; border: none; border-radius: 4px; cursor: pointer; background-color: #c0392b;}
-
-        /* --- Layout Responsivo --- */
-        @media (max-width: 992px) {
-            .page-wrapper { flex-direction: column; padding: 1rem; }
-            .floating-controls { width: 100%; position: static; margin-bottom: 1rem; justify-content: center; }
-            .main-content { padding: 1rem; }
-            .customizer-panel { right: 1rem; top: 5rem; width: calc(100% - 2rem); }
-        }
-    </style> <!-- Fim do bloco de estilos CSS. -->
-</head> <!-- Fim da seção <head>. -->
-<body> <!-- Início da seção <body>, onde o conteúdo visível da página é colocado. -->
-
-    <div class="page-wrapper"> <!-- Contêiner principal que organiza o layout da página. -->
-        <div class="floating-controls"> <!-- Contêiner para os botões de ação no topo. -->
-            <button id="savePdfBtn" class="main-action-btn">Salvar PDF</button>
-            <button id="saveJpgBtn" class="main-action-btn">Exportar JPG</button>
-            <button id="toggleEditModeBtn" class="main-action-btn">Ativar Edição</button>
-            <button id="customizeBtn" class="main-action-btn customizer-toggle-btn">Personalizar</button>
-        </div> <!-- Fim do contêiner de botões. -->
         
-        <div class="main-content"> <!-- Coluna principal, contendo o documento. -->
-            <div class="card-container"> <!-- Contêiner do conteúdo. -->
-                <div class="card-content">
-                    <div class="profile-pic-container" id="uploadProfilePic">
-                        <img id="profileImage" alt="Foto de Perfil">
-                    </div>
-                    <input type="file" id="profileUploader" accept="image/*" style="display:none;">
+        /* Posicionamento inicial (Layout Original) */
+        .profile-pic-frame { top: 1.5cm; width: 3.5cm; height: 3.5cm; }
+        .name { top: 5.5cm; }
+        .condition { top: 6.8cm; }
+        .divider { top: 7.8cm; width: 80%;}
+        .section-title { top: 8.2cm; }
+        .medications { top: 8.9cm; }
+        .allergy { top: 11.2cm; }
+        .notes-text { top: 11.9cm; }
+        .id-number { top: 12.6cm; }
+        .contact-info { top: 13.3cm; }
 
-                    <div class="info-block">
-                        <h1 class="editable">Gabrielle Souza Quintanilha Silva</h1>
-                        <h2 class="editable">EPILEPSIA E HIPOGLICEMIA</h2>
-                    </div>
+        .profile-pic-frame {
+            aspect-ratio: 1 / 1;
+            background-color: #ffffff;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border: 1px solid #ddd;
+            flex-shrink: 0; 
+        }
+        .profile-pic { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: none; }
+        .name { font-size: 0.55cm; font-weight: bold; line-height: 1.2; }
+        .condition { font-size: 0.4cm; }
+        .divider { height: 1px; background-color: #ffffff; }
+        .section-title { font-size: 0.4cm; font-weight: bold; }
+        .medication-item { font-size: 0.38cm; line-height: 1.4; }
+        .allergy-text { font-size: 0.38cm; font-weight: bold; color: #ffeb3b; }
+        .notes-text { font-size: 0.38cm; }
+        .id-number { font-size: 0.38cm; }
+        .contact-info { font-size: 0.4cm; font-weight: bold; }
+        
+        [contenteditable]:focus { outline: 1px dashed rgba(255, 255, 255, 0.7); background-color: rgba(0,0,0,0.1); }
+        .selected-text { outline: 2px solid #007bff !important; box-shadow: 0 0 10px rgba(0, 123, 255, 0.5); }
 
-                    <div class="info-block">
-                        <h3 class="editable">MEDICAÇÕES:</h3>
-                        <p class="editable">FENOBARBITAL 150MG / 1X AO DIA<br>CLONOZEPAM 2MG / 3X AO DIA<br>FLUOXETINA 20MG / 1X AO DIA<br>TOPIRAMATO</p>
-                        <p class="editable allergy">ALERGIA A FENITOÍNA</p>
-                    </div>
-                    
-                    <div class="info-block">
-                         <p class="editable">ID Nº:</p>
-                    </div>
+        /* PAINÉIS DE CONTROLE FLUTUANTES */
+        .control-group { position: absolute; z-index: 1000; background-color: rgba(255, 255, 255, 0.95); border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); padding: 0; width: 220px; border: 1px solid #ccc; }
+        .control-group-header { padding: 10px 12px; font-size: 14px; font-weight: bold; color: #007bff; cursor: move; border-bottom: 1px solid #eee; user-select: none; }
+        .control-group-header:hover { background-color: #f0f0f0; }
+        .control-content { padding: 8px 12px 12px 12px; display: none; }
+        .control-group.active .control-content { display: block; }
+        #group-layout { top: 20px; left: 20px; }
+        #group-image { top: 20px; left: 260px; }
+        #group-export { top: 20px; left: 500px; }
+        #group-layouts-preset { top: 20px; left: 740px; }
+        .sub-group { margin-top: 10px; }
+        .sub-group-label { font-size: 12px; font-weight: bold; color: #555; display: block; margin-bottom: 5px; }
+        .controls button, .controls input[type="file"] { padding: 6px 10px; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; font-size: 14px; background-color: #f8f9fa; color: #333; transition: background-color 0.2s, border-color 0.2s; margin-top: 4px; display: block; width: 100%; box-sizing: border-box; }
+        .controls button:hover { background-color: #e2e6ea; border-color: #bbb; }
+        .controls input[type="color"] { width: 100%; height: 35px; padding: 2px; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; }
+        .text-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 8px; }
+        .color-picker-label { display: flex; align-items: center; justify-content: space-between; gap: 5px; margin-top: 8px; }
+        .color-picker-label label { font-size: 12px; margin-bottom: 0; color: #333; }
+        .transparency-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div class="card-container" id="cardContainer">
+        <div class="card-background-image" id="cardBackgroundImage"></div>
+        <div class="profile-pic-frame" id="profilePicFrame"><img src="" alt="Foto de Perfil" class="profile-pic" id="profilePic"></div>
+        <div class="name editable-text" id="nameText">Gabrielle Souza Quintanilha Silva</div>
+        <div class="condition editable-text" id="conditionText">EPILEPSIA E HIPOGLICEMIA</div>
+        <div class="divider" id="dividerLine"></div>
+        <div class="section-title editable-text" id="medicationsTitle">MEDICAÇÕES:</div>
+        <div class="medications" id="medicationsList">
+            <div class="medication-item editable-text">FENOBARBITAL 150MG / 1X AO DIA</div>
+            <div class="medication-item editable-text">CLONOZEPAM 2MG / 3X AO DIA</div>
+            <div class="medication-item editable-text">FLUOXETINA 20MG / 1X AO DIA</div>
+            <div class="medication-item editable-text">TOPIRAMATO</div>
+        </div>
+        <div class="allergy" id="allergyText">
+            <div class="allergy-text editable-text">ALERGIA A FENITOÍNA</div>
+        </div>
+        <div class="notes-text editable-text" id="notesText">Observações...</div>
+        <div class="id-number editable-text" id="idNumberText">ID Nº:</div>
+        <div class="contact-info editable-text" id="contactInfoText">TELEFONE DE CONTATO</div>
+    </div>
 
-                    <div class="info-block">
-                        <h3 class="editable">Telefone de contato</h3>
-                        <p class="editable">Mãe (Fabiane):</p>
-                        <p class="editable">Padrinho (Roberto):</p>
-                    </div>
+    <div class="controls">
+        <div class="control-group" id="group-layout">
+            <div class="control-group-header">Edição de Layout</div>
+            <div class="control-content">
+                <div class="text-controls"><button id="increaseTextSizeBtn" title="Aumentar Texto">Aumentar</button><button id="decreaseTextSizeBtn" title="Reduzir Texto">Reduzir</button></div>
+                <button id="centerAllBtn">Centralizar Tudo</button>
+                <div class="sub-group">
+                    <span class="sub-group-label">Cores Específicas</span>
+                    <div class="color-picker-label"><label for="nameColorPicker">Nome:</label><input type="color" id="nameColorPicker" value="#ffffff"></div>
+                    <div class="color-picker-label"><label for="conditionColorPicker">Condição:</label><input type="color" id="conditionColorPicker" value="#ffffff"></div>
+                    <div class="color-picker-label"><label for="medTitleColorPicker">Título Med:</label><input type="color" id="medTitleColorPicker" value="#ffffff"></div>
+                    <div class="color-picker-label"><label for="medListColorPicker">Lista Med:</label><input type="color" id="medListColorPicker" value="#ffffff"></div>
+                    <div class="color-picker-label"><label for="allergyColorPicker">Alergia:</label><input type="color" id="allergyColorPicker" value="#ffeb3b"></div>
+                    <div class="color-picker-label"><label for="notesColorPicker">Obs:</label><input type="color" id="notesColorPicker" value="#ffffff"></div>
+                    <div class="color-picker-label"><label for="idColorPicker">ID:</label><input type="color" id="idColorPicker" value="#ffffff"></div>
+                    <div class="color-picker-label"><label for="contactColorPicker">Contato:</label><input type="color" id="contactColorPicker" value="#ffffff"></div>
+                </div>
+                <div class="sub-group"><span class="sub-group-label">Cor de Fundo</span><input type="color" id="backgroundColorPicker" value="#6a0dad" title="Cor do Fundo"></div>
+            </div>
+        </div>
+        <div class="control-group" id="group-image">
+            <div class="control-group-header">Imagem</div>
+            <div class="control-content">
+                <div class="sub-group"><span class="sub-group-label">Foto de Perfil</span><input type="file" id="addPhotoBtn" accept="image/*" title="Adicionar Foto"><button id="removePhotoBtn">Remover</button></div>
+                <div class="sub-group"><span class="sub-group-label">Imagem de Fundo</span><input type="file" id="addBackgroundBtn" accept="image/*" title="Adicionar Fundo"><button id="removeBackgroundBtn">Remover</button>
+                    <div class="transparency-controls"><button id="increaseBgTransparencyBtn" title="Deixar imagem mais transparente">+ Transparência</button><button id="decreaseBgTransparencyBtn" title="Deixar imagem mais opaca">- Transparência</button></div>
                 </div>
             </div>
         </div>
+        <div class="control-group" id="group-export">
+            <div class="control-group-header">Salvar / Exportar</div>
+            <div class="control-content"><button id="exportJpegBtn">Salvar JPG</button><button id="exportPdfBtn">Salvar PDF</button></div>
+        </div>
+        <div class="control-group" id="group-layouts-preset">
+            <div class="control-group-header">Outras Opções de Layout</div>
+            <div class="control-content">
+                <button id="layoutOriginalBtn">Original</button>
+                <button id="layout2Btn">Foto na Lateral</button>
+                <button id="layout3Btn">Layout 3</button>
+                <button id="layout4Btn">Layout 4</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <script>
+        // --- LÓGICA DOS CONTROLES DO CARTÃO ---
+        const cardContainer = document.getElementById('cardContainer');
+        const cardBackgroundImage = document.getElementById('cardBackgroundImage');
+        const profilePic = document.getElementById('profilePic');
+        const addPhotoBtn = document.getElementById('addPhotoBtn');
+        const removePhotoBtn = document.getElementById('removePhotoBtn');
+        const addBackgroundBtn = document.getElementById('addBackgroundBtn');
+        const removeBackgroundBtn = document.getElementById('removeBackgroundBtn');
+        const backgroundColorPicker = document.getElementById('backgroundColorPicker');
+        const increaseTextSizeBtn = document.getElementById('increaseTextSizeBtn');
+        const decreaseTextSizeBtn = document.getElementById('decreaseTextSizeBtn');
+        const exportJpegBtn = document.getElementById('exportJpegBtn');
+        const exportPdfBtn = document.getElementById('exportPdfBtn');
+        const centerAllBtn = document.getElementById('centerAllBtn');
+        const increaseBgTransparencyBtn = document.getElementById('increaseBgTransparencyBtn');
+        const decreaseBgTransparencyBtn = document.getElementById('decreaseBgTransparencyBtn');
+        let bgImageOpacity = 1.0;
+        let selectedElement = null;
+
+        const allEditableText = document.querySelectorAll('.editable-text');
+        const allDraggableElements = document.querySelectorAll('.profile-pic-frame, .name, .condition, .section-title, .medications, .allergy, .id-number, .contact-info, .divider, .notes-text');
         
-        <div id="colorCustomizer" class="customizer-panel"> <!-- Painel de personalização (agora flutuante). -->
-            <div class="picker-group"><label for="pageBgColor">Fundo da Página</label><input type="color" id="pageBgColor"></div>
-            <div class="picker-group"><label for="cardBgColor">Fundo da Carteirinha</label><input type="color" id="cardBgColor"></div>
-            <div class="picker-group"><label for="textColor">Cor do Texto</label><input type="color" id="textColor"></div>
-            <hr style="margin: 15px 0;"> <!-- Linha divisória. -->
-            <div class="picker-group"><label>Foto</label><button id="removeProfileBtn" class="delete-btn">Remover</button></div>
-            <div class="picker-group"><label>Fundo</label><button id="removeBgBtn" class="delete-btn">Remover</button></div>
-             <div class="picker-group"><button id="uploadBgBtn" class="main-action-btn" style="width: auto; background-color: #5f27cd;">Adicionar Fundo</button></div>
-            <hr style="margin: 15px 0;"> <!-- Linha divisória. -->
-            <div class="picker-group layout-controls"> <!-- Grupo de alinhamento. -->
-                <label>Alinhar Texto</label> <!-- Rótulo. -->
-                <div class="btn-group"> <!-- Agrupador de botões. -->
-                    <button id="alignLeftBtn">E</button>
-                    <button id="alignCenterBtn">C</button>
-                    <button id="alignRightBtn">D</button>
-                </div> <!-- Fim do grupo. -->
-            </div> <!-- Fim do grupo de alinhamento. -->
-            <hr style="margin: 15px 0;"> <!-- Linha divisória. -->
-            <div class="picker-group font-controls"> <!-- Grupo de controle de fonte. -->
-                <label>Tamanho da Fonte</label> <!-- Rótulo. -->
-                <div class="btn-group"> <!-- Agrupador de botões. -->
-                    <button id="decreaseFontBtn">-</button> <!-- Botão para diminuir a fonte. -->
-                    <button id="increaseFontBtn">+</button> <!-- Botão para aumentar a fonte. -->
-                </div> <!-- Fim do grupo de botões. -->
-            </div> <!-- Fim do grupo de fonte. -->
-        </div> <!-- Fim do painel de cores. -->
+        // LÓGICA DE SELEÇÃO E EDIÇÃO DE TEXTO
+        allEditableText.forEach(el => {
+            el.addEventListener('click', (e) => { if (selectedElement) { selectedElement.classList.remove('selected-text'); } selectedElement = e.target.closest('.editable-text'); selectedElement.classList.add('selected-text'); e.stopPropagation(); });
+            el.addEventListener('dblclick', (e) => { const target = e.target.closest('.editable-text'); target.contentEditable = true; target.focus(); });
+            el.addEventListener('blur', (e) => { e.target.closest('.editable-text').contentEditable = false; });
+        });
+        
+        cardContainer.addEventListener('click', (e) => { if (selectedElement && e.target === cardContainer) { selectedElement.classList.remove('selected-text'); selectedElement = null; } });
 
-    </div> <!-- Fim do page-wrapper. -->
-     <input type="file" id="bgUploader" accept="image/*" style="display:none;">
+        // LÓGICA DE AUMENTAR/REDUZIR TAMANHO
+        increaseTextSizeBtn.addEventListener('click', () => { if (selectedElement) { let currentSize = parseFloat(window.getComputedStyle(selectedElement).fontSize); selectedElement.style.fontSize = `${currentSize * 1.05}px`; } else { alert("Por favor, clique em um texto no crachá para selecionar antes de alterar o tamanho."); } });
+        decreaseTextSizeBtn.addEventListener('click', () => { if (selectedElement) { let currentSize = parseFloat(window.getComputedStyle(selectedElement).fontSize); selectedElement.style.fontSize = `${currentSize * 0.95}px`; } else { alert("Por favor, clique em um texto no crachá para selecionar antes de alterar o tamanho."); } });
 
-    <script> // Inicia um bloco de código JavaScript.
-        let isEditMode = false; // Controla se o modo de edição está ativo.
-        const toggleEditModeBtn = document.getElementById('toggleEditModeBtn'); // Botão de ativar edição.
-        let selectedEditableElement = null; // Guarda o elemento selecionado para alinhar ou mudar a fonte.
+        // LÓGICA PARA CENTRALIZAR TUDO
+        centerAllBtn.addEventListener('click', () => {
+            allDraggableElements.forEach(el => {
+                el.style.left = '50%';
+                el.style.transform = 'translateX(-50%)';
+                if (el.classList.contains('editable-text') || el.classList.contains('medications')) { el.style.textAlign = 'center'; }
+            });
+        });
 
-        function getEditableElements() { return document.querySelectorAll('.editable'); } // Função para buscar todos os elementos editáveis.
+        // Eventos de cor
+        document.getElementById('nameColorPicker').addEventListener('input', (e) => { document.getElementById('nameText').style.color = e.target.value; });
+        document.getElementById('conditionColorPicker').addEventListener('input', (e) => { document.getElementById('conditionText').style.color = e.target.value; });
+        document.getElementById('medTitleColorPicker').addEventListener('input', (e) => { document.getElementById('medicationsTitle').style.color = e.target.value; });
+        document.getElementById('medListColorPicker').addEventListener('input', (e) => { document.querySelectorAll('#medicationsList .medication-item').forEach(item => item.style.color = e.target.value); });
+        document.getElementById('allergyColorPicker').addEventListener('input', (e) => { document.querySelector('.allergy-text').style.color = e.target.value; });
+        document.getElementById('notesColorPicker').addEventListener('input', (e) => { document.getElementById('notesText').style.color = e.target.value; });
+        document.getElementById('idColorPicker').addEventListener('input', (e) => { document.getElementById('idNumberText').style.color = e.target.value; });
+        document.getElementById('contactColorPicker').addEventListener('input', (e) => { document.getElementById('contactInfoText').style.color = e.target.value; });
+        
+        // Demais eventos
+        addPhotoBtn.addEventListener('change', (e) => { if (e.target.files && e.target.files[0]) { profilePic.src = URL.createObjectURL(e.target.files[0]); profilePic.style.display = 'block'; } });
+        removePhotoBtn.addEventListener('click', () => { profilePic.src = ''; profilePic.style.display = 'none'; addPhotoBtn.value = ''; });
+        addBackgroundBtn.addEventListener('change', (e) => { if (e.target.files && e.target.files[0]) { const reader = new FileReader(); reader.onload = (event) => { cardBackgroundImage.style.backgroundImage = `url(${event.target.result})`; bgImageOpacity = 1.0; cardBackgroundImage.style.opacity = bgImageOpacity; }; reader.readAsDataURL(e.target.files[0]); } });
+        removeBackgroundBtn.addEventListener('click', () => { cardBackgroundImage.style.backgroundImage = 'none'; addBackgroundBtn.value = ''; });
+        backgroundColorPicker.addEventListener('input', (e) => { cardContainer.style.backgroundColor = e.target.value; });
+        increaseBgTransparencyBtn.addEventListener('click', () => { bgImageOpacity = Math.max(0, bgImageOpacity - 0.1); cardBackgroundImage.style.opacity = bgImageOpacity; });
+        decreaseBgTransparencyBtn.addEventListener('click', () => { bgImageOpacity = Math.min(1, bgImageOpacity + 0.1); cardBackgroundImage.style.opacity = bgImageOpacity; });
+        
+        function beforeExport() { if(selectedElement){ selectedElement.classList.remove('selected-text'); selectedElement = null; } }
+        exportJpegBtn.addEventListener('click', () => { beforeExport(); html2canvas(cardContainer, { scale: 3, useCORS: true }).then(canvas => { const link = document.createElement('a'); link.href = canvas.toDataURL('image/jpeg', 0.9); link.download = 'cartao-saude.jpg'; link.click(); }); });
+        exportPdfBtn.addEventListener('click', () => { beforeExport(); html2canvas(cardContainer, { scale: 4, useCORS: true }).then(canvas => { const imgData = canvas.toDataURL('image/png'); const { jsPDF } = window.jspdf; const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [100, 150] }); pdf.addImage(imgData, 'PNG', 0, 0, 100, 150); pdf.save('cartao-saude.pdf'); }); });
 
-        document.addEventListener('click', function(event) { // Ouve cliques no documento.
-            if (isEditMode && event.target.closest('.editable')) { // Se em modo de edição e clicou em algo editável.
-                const targetEditable = event.target.closest('.editable'); // Pega o elemento editável mais próximo.
-                if (selectedEditableElement) { // Se já tem um selecionado.
-                    selectedEditableElement.classList.remove('selected-for-alignment'); // Remove o destaque.
-                } // Fim do if.
-                selectedEditableElement = targetEditable; // Define o novo selecionado.
-                selectedEditableElement.classList.add('selected-for-alignment'); // Adiciona o destaque.
-            } // Fim do if.
-        }); // Fim do ouvinte de clique.
+        // LÓGICA PARA ARRASTAR CONTEÚDO DENTRO DO CARTÃO
+        allDraggableElements.forEach(el => {
+            let isDragging = false, offsetX, offsetY;
+            el.addEventListener('mousedown', (e) => { if (e.target.isContentEditable && document.activeElement === e.target) { return; } isDragging = true; offsetX = e.clientX - el.offsetLeft; offsetY = e.clientY - el.offsetTop; el.style.zIndex = 2; e.preventDefault(); });
+            document.addEventListener('mousemove', (e) => { if (!isDragging) return; el.style.left = `${e.clientX - offsetX}px`; el.style.top = `${e.clientY - offsetY}px`; });
+            document.addEventListener('mouseup', () => { isDragging = false; el.style.zIndex = 1; });
+        });
 
-        function exitEditMode() { // Função para desativar o modo de edição.
-            if (isEditMode) { // Se estiver ativo.
-                isEditMode = false; // Desativa a flag.
-                toggleEditModeBtn.textContent = 'Ativar Edição'; // Restaura o texto do botão.
-                getEditableElements().forEach(el => { // Para cada elemento editável.
-                    el.contentEditable = 'false'; // Desativa a edição.
-                    el.classList.remove('selected-for-alignment'); // Remove o destaque.
-                }); // Fim do forEach.
-                selectedEditableElement = null; // Limpa a seleção.
-            } // Fim do if.
-        } // Fim da função.
+        // --- LÓGICA PARA TROCA DE LAYOUTS ---
+        const layoutPresets = {
+            original: { profilePicFrame: { top: '1.5cm', left: '50%', transform: 'translateX(-50%)' }, nameText: { top: '5.5cm', left: '50%', transform: 'translateX(-50%)' }, conditionText: { top: '6.8cm', left: '50%', transform: 'translateX(-50%)' }, dividerLine: { top: '7.8cm', left: '50%', transform: 'translateX(-50%)' }, medicationsTitle: { top: '8.2cm', left: '50%', transform: 'translateX(-50%)' }, medicationsList: { top: '8.9cm', left: '50%', transform: 'translateX(-50%)' }, allergyText: { top: '11.2cm', left: '50%', transform: 'translateX(-50%)' }, notesText: { top: '11.9cm', left: '50%', transform: 'translateX(-50%)' }, idNumberText: { top: '12.6cm', left: '50%', transform: 'translateX(-50%)' }, contactInfoText: { top: '13.3cm', left: '50%', transform: 'translateX(-50%)' }, textAlign: 'center'},
+            layout2: { 
+                profilePicFrame: { top: '1.5cm', left: '1.5cm', transform: 'none' }, 
+                nameText: { top: '1.5cm', left: '5.5cm', transform: 'none', width: '4cm', textAlign: 'left' }, 
+                conditionText: { top: '3cm', left: '5.5cm', transform: 'none', width: '4cm', textAlign: 'left' }, 
+                dividerLine: { top: '5cm', left: '50%', transform: 'translateX(-50%)' }, 
+                medicationsTitle: { top: '5.5cm', left: '5%', transform: 'none', width: '90%', textAlign: 'left' }, 
+                medicationsList: { top: '6.3cm', left: '5%', transform: 'none', width: '90%', textAlign: 'left' }, 
+                allergyText: { top: '8.8cm', left: '5%', transform: 'none', width: '90%', textAlign: 'left' }, 
+                notesText: { top: '9.5cm', left: '5%', transform: 'none', width: '90%', textAlign: 'left' }, 
+                idNumberText: { top: '12.8cm', left: '50%', transform: 'translateX(-50%)', textAlign: 'center' }, 
+                contactInfoText: { top: '13.5cm', left: '50%', transform: 'translateX(-50%)', textAlign: 'center' }
+            },
+            layout3: { profilePicFrame: { top: '1.5cm', left: '50%', transform: 'translateX(-50%)' }, nameText: { top: '5.5cm', left: '50%', transform: 'translateX(-50%)' }, conditionText: { top: '6.8cm', left: '50%', transform: 'translateX(-50%)' }, dividerLine: { top: '7.8cm', left: '50%', transform: 'translateX(-50%)' }, medicationsTitle: { top: '8.2cm', left: '50%', transform: 'translateX(-50%)' }, medicationsList: { top: '8.9cm', left: '50%', transform: 'translateX(-50%)' }, allergyText: { top: '11.2cm', left: '50%', transform: 'translateX(-50%)' }, notesText: { top: '11.9cm', left: '50%', transform: 'translateX(-50%)' }, idNumberText: { top: '13.3cm', left: '10%', transform: 'none', width: 'auto', textAlign: 'left' }, contactInfoText: { top: '13.3cm', left: 'auto', right: '10%', transform: 'none', width: 'auto', textAlign: 'right' }, textAlign: 'center'},
+            layout4: { profilePicFrame: { top: '10cm', left: '50%', transform: 'translateX(-50%)' }, nameText: { top: '1.5cm', left: '50%', transform: 'translateX(-50%)' }, conditionText: { top: '2.8cm', left: '50%', transform: 'translateX(-50%)' }, dividerLine: { top: '3.8cm', left: '50%', transform: 'translateX(-50%)' }, medicationsTitle: { top: '4.2cm', left: '50%', transform: 'translateX(-50%)' }, medicationsList: { top: '4.9cm', left: '50%', transform: 'translateX(-50%)' }, allergyText: { top: '7.2cm', left: '50%', transform: 'translateX(-50%)' }, notesText: { top: '7.9cm', left: '50%', transform: 'translateX(-50%)' }, idNumberText: { top: '8.6cm', left: '50%', transform: 'translateX(-50%)' }, contactInfoText: { top: '13.5cm', left: '50%', transform: 'translateX(-50%)' }, textAlign: 'center'}
+        };
 
-        function toggleInteractiveElements(shouldShow) { // Mostra ou oculta os controles.
-            exitEditMode(); // Garante que saia do modo de edição.
-            document.querySelector('.floating-controls').style.display = shouldShow ? 'flex' : 'none'; // Mostra ou oculta.
-            if (!shouldShow) {
-                document.getElementById('colorCustomizer').style.display = 'none';
+        function applyLayout(preset) {
+            for (const id in preset) {
+                if (id === 'textAlign') continue;
+                const element = document.getElementById(id);
+                if (element) {
+                    const styles = preset[id];
+                    element.style.top = styles.top || '';
+                    element.style.left = styles.left || '';
+                    element.style.right = styles.right || '';
+                    element.style.width = styles.width || (id === 'profilePicFrame' ? '3.5cm' : (id === 'dividerLine' ? '80%' : '90%'));
+                    element.style.transform = styles.transform || 'none';
+                    // Aplica o alinhamento de texto específico do estilo, se houver, ou o padrão do preset
+                    element.style.textAlign = styles.textAlign || preset.textAlign || 'center';
+                }
             }
-        } // Fim da função.
+        }
+        document.getElementById('layoutOriginalBtn').addEventListener('click', () => applyLayout(layoutPresets.original));
+        document.getElementById('layout2Btn').addEventListener('click', () => applyLayout(layoutPresets.layout2));
+        document.getElementById('layout3Btn').addEventListener('click', () => applyLayout(layoutPresets.layout3));
+        document.getElementById('layout4Btn').addEventListener('click', () => applyLayout(layoutPresets.layout4));
 
-        document.getElementById('savePdfBtn').addEventListener('click', function () { // Ouve o clique para salvar PDF.
-            const element = document.querySelector('.main-content'); // Seleciona o conteúdo a ser salvo.
-            toggleInteractiveElements(false); // Oculta os controles.
-            const opt = { margin: 0, filename: 'carteirinha.pdf', image: { type: 'jpeg', quality: 1.0 }, html2canvas: { scale: 3, useCORS: true, backgroundColor: getComputedStyle(document.body).getPropertyValue('--body-bg-color') }, jsPDF: { unit: 'in', format: [3.37, 2.125], orientation: 'landscape' } }; // Opções do PDF para tamanho de carteirinha.
-            html2pdf().from(element).set(opt).save().then(() => toggleInteractiveElements(true)); // Salva e depois mostra os controles.
-        }); // Fim do ouvinte.
-
-        document.getElementById('saveJpgBtn').addEventListener('click', function() { // Ouve o clique para salvar JPG.
-            const element = document.querySelector('.main-content'); // Seleciona o conteúdo.
-            toggleInteractiveElements(false); // Oculta os controles.
-            html2canvas(element, { useCORS: true, scale: 3, backgroundColor: getComputedStyle(document.body).getPropertyValue('--body-bg-color') }).then(canvas => { // Gera a imagem.
-                const link = document.createElement('a'); // Cria um link de download.
-                link.href = canvas.toDataURL('image/jpeg', 1.0); // Define o link para a imagem gerada.
-                link.download = 'carteirinha.jpg'; // Define o nome do arquivo.
-                link.click(); // Inicia o download.
-                toggleInteractiveElements(true); // Mostra os controles.
-            }); // Fim do processamento.
-        }); // Fim do ouvinte.
-
-        toggleEditModeBtn.addEventListener('click', function() { // Ouve o clique para ativar/desativar edição.
-            isEditMode = !isEditMode; // Inverte o estado.
-            this.textContent = isEditMode ? 'Salvar e Sair' : 'Ativar Edição'; // Muda o texto do botão.
-            getEditableElements().forEach(el => { el.contentEditable = isEditMode; }); // Ativa/desativa a edição.
-            if (!isEditMode && selectedEditableElement) { // Se saiu do modo de edição.
-                selectedEditableElement.classList.remove('selected-for-alignment'); // Remove o destaque.
-                selectedEditableElement = null; // Limpa a seleção.
-            } // Fim do if.
-        }); // Fim do ouvinte.
-
-        document.getElementById('customizeBtn').addEventListener('click', function() { // Ouve o clique no botão de customizar.
-            const panel = document.getElementById('colorCustomizer'); // Pega o painel de cores.
-            panel.style.display = panel.style.display === 'block' ? 'none' : 'block'; // Alterna a visibilidade.
-        }); // Fim do ouvinte.
-        
-        function updateColor(variableName, color) { document.documentElement.style.setProperty(variableName, color); } // Função para atualizar uma variável CSS.
-        document.getElementById('pageBgColor').addEventListener('input', (e) => updateColor('--body-bg-color', e.target.value)); // Ouve o seletor e atualiza a cor.
-        document.getElementById('cardBgColor').addEventListener('input', (e) => updateColor('--card-bg-color', e.target.value)); // Ouve o seletor e atualiza a cor.
-        document.getElementById('textColor').addEventListener('input', (e) => updateColor('--main-text-color', e.target.value)); // Ouve o seletor e atualiza a cor.
-        
-        function colorToHex(color) { // Converte cores RGB para Hexadecimal.
-            if (!color || color === 'transparent') return '#ffffff'; // Retorna branco se transparente.
-            if (color.startsWith('#')) return color; // Retorna se já for Hex.
-            if (color.startsWith('rgb')) { // Se for RGB.
-                const parts = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/); // Separa os valores.
-                parts.shift(); // Remove o primeiro item.
-                return '#' + parts.map(part => parseInt(part).toString(16).padStart(2, '0')).join(''); // Converte e junta.
-            } // Fim do if.
-            return color; // Retorna a cor original se não for um formato reconhecido.
-        } // Fim da função.
-        
-        setTimeout(() => { // Inicializa os seletores de cores na carga da página.
-            const computedStyle = getComputedStyle(document.documentElement); // Pega os estilos.
-            document.getElementById('pageBgColor').value = colorToHex(computedStyle.getPropertyValue('--body-bg-color').trim()); // Define o valor inicial.
-            document.getElementById('cardBgColor').value = colorToHex(computedStyle.getPropertyValue('--card-bg-color').trim()); // Define o valor inicial.
-            document.getElementById('textColor').value = colorToHex(computedStyle.getPropertyValue('--main-text-color').trim()); // Define o valor inicial.
-        }, 100); // Atraso.
-
-        // --- UPLOAD DE FOTO E FUNDO ---
-        document.getElementById('uploadProfilePic').addEventListener('click', () => document.getElementById('profileUploader').click());
-        document.getElementById('profileUploader').addEventListener('change', function(event) {
-            if (event.target.files[0]) {
-                const reader = new FileReader();
-                reader.onload = e => { 
-                    document.getElementById('profileImage').src = e.target.result; 
-                    document.getElementById('profileImage').style.display = 'block'; 
-                };
-                reader.readAsDataURL(event.target.files[0]);
-            }
+        // --- LÓGICA PARA PAINÉIS DE CONTROLE DRAGGABLE E COLLAPSIBLE ---
+        const controlGroups = document.querySelectorAll('.control-group');
+        controlGroups.forEach(group => {
+            const header = group.querySelector('.control-group-header');
+            header.addEventListener('click', () => {
+                controlGroups.forEach(otherGroup => { if (otherGroup !== group) { otherGroup.classList.remove('active'); } });
+                group.classList.toggle('active');
+            });
+            let isDragging = false, offsetX, offsetY;
+            header.addEventListener('mousedown', (e) => { isDragging = true; controlGroups.forEach(g => g.style.zIndex = 1000); group.style.zIndex = 1001; offsetX = e.clientX - group.offsetLeft; offsetY = e.clientY - group.offsetTop; e.preventDefault(); });
+            document.addEventListener('mousemove', (e) => { if (!isDragging) return; let newX = e.clientX - offsetX; let newY = e.clientY - offsetY; group.style.left = `${newX}px`; group.style.top = `${newY}px`; });
+            document.addEventListener('mouseup', () => { isDragging = false; });
         });
-        document.getElementById('removeProfileBtn').addEventListener('click', function() {
-            document.getElementById('profileImage').src = ''; 
-            document.getElementById('profileImage').style.display = 'none'; 
-            document.getElementById('profileUploader').value = ''; 
-        });
-
-        document.getElementById('uploadBgBtn').addEventListener('click', () => document.getElementById('bgUploader').click());
-        document.getElementById('bgUploader').addEventListener('change', function(event) {
-            if (event.target.files[0]) {
-                const reader = new FileReader();
-                reader.onload = e => { document.documentElement.style.setProperty('--bg-image', `url('${e.target.result}')`); };
-                reader.readAsDataURL(event.target.files[0]);
-            }
-        });
-        document.getElementById('removeBgBtn').addEventListener('click', function() {
-            document.documentElement.style.setProperty('--bg-image', 'none'); 
-            document.getElementById('bgUploader').value = ''; 
-        });
-        
-        function alignSelectedElement(alignment) { // Função para alinhar texto.
-            if (isEditMode && selectedEditableElement) { // Se em modo de edição e com texto selecionado.
-                selectedEditableElement.style.textAlign = alignment; // Aplica o alinhamento.
-            } else if (isEditMode) { // Se em modo de edição mas sem texto selecionado.
-                alert("Por favor, clique em um texto para selecionar antes de alinhar."); // Alerta o usuário.
-            } // Fim do if/else.
-        } // Fim da função.
-
-        function changeFontSize(amount) { // Função para alterar o tamanho da fonte.
-            if (isEditMode && selectedEditableElement) { // Se em modo de edição e com texto selecionado.
-                const style = window.getComputedStyle(selectedEditableElement, null).getPropertyValue('font-size'); // Pega o tamanho da fonte atual.
-                const currentSize = parseFloat(style); // Converte para um número.
-                selectedEditableElement.style.fontSize = (currentSize + amount) + 'px'; // Aumenta ou diminui e aplica o novo tamanho.
-            } else if (isEditMode) { // Se em modo de edição mas sem texto selecionado.
-                alert("Por favor, clique em um texto para selecionar antes de alterar o tamanho da fonte."); // Alerta o usuário.
-            } // Fim do if/else.
-        } // Fim da função.
-        
-        document.getElementById('alignLeftBtn').addEventListener('click', () => alignSelectedElement('left')); // Ouve o clique para alinhar à esquerda.
-        document.getElementById('alignCenterBtn').addEventListener('click', () => alignSelectedElement('center')); // Ouve o clique para alinhar ao centro.
-        document.getElementById('alignRightBtn').addEventListener('click', () => alignSelectedElement('right')); // Ouve o clique para alinhar à direita.
-        document.getElementById('increaseFontBtn').addEventListener('click', () => changeFontSize(1)); // Ouve o clique para aumentar a fonte em 1px.
-        document.getElementById('decreaseFontBtn').addEventListener('click', () => changeFontSize(-1)); // Ouve o clique para diminuir a fonte em 1px.
-
-    </script> <!-- Fim do bloco de script. -->
-</body> <!-- Fim do corpo do documento. -->
-</html> <!-- Fim do documento HTML. -->
-
+    </script>
+</body>
+</html>
